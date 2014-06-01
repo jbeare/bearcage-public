@@ -1,0 +1,7 @@
+*.sdf
+SimpleServer/Debug*
+SimpleServer/Release*
+SimpleServer/SimpleServer/Debug*
+SimpleServer/SimpleServer/Release*
+SimpleServer/SimpleClient/Debug*
+SimpleServer/SimpleClient/Release*
