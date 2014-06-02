@@ -17,16 +17,16 @@
 #include "SimpleServer.h"
 
 void SimpleServer::Start() {
-	AcceptConnection();
-	m_ioService.run();
+	m_thread = boost::thread(boost::bind(&SimpleServer::StartThread, this));
 }
 
 void SimpleServer::Stop() {
-
+	m_ioService.stop();
+	m_thread.join();
 }
 
 void SimpleServer::AcceptConnection() {
-	boost::shared_ptr<SimpleConnection> connection = SimpleConnection::create(m_ioService);
+	boost::shared_ptr<SimpleConnection> connection = SimpleConnection::Create(m_ioService, m_callback);
 
 	m_acceptor.async_accept(connection->Socket(),
 		boost::bind(&SimpleServer::HandleAcceptConnection, this, connection,
@@ -35,10 +35,16 @@ void SimpleServer::AcceptConnection() {
 
 void SimpleServer::HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, const boost::system::error_code& Error) {
 	if(!Error) {
-		std::cout << "Accepted a connection." << std::endl;
+		boost::shared_ptr<SimpleConnectionEvent> connectionEvent =
+			SimpleConnectionEvent::Create(SimpleConnectionEvent::Connected, Connection, std::vector<char>(), 0);
+		Callback(connectionEvent);
 		Connection->Start();
-		Connection->Write("Hello", 5);
 	}
 
 	AcceptConnection();
+}
+
+void SimpleServer::StartThread() {
+	AcceptConnection();
+	m_ioService.run();
 }

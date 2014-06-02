@@ -24,10 +24,59 @@
 #define MAX_BUFFER_LENGTH 1024
 #define DEFAULT_PORT 13
 
+class SimpleConnection;
+
+class SimpleConnectionEvent {
+public:
+	enum SimpleConnectionEventType{
+		Connected,
+		Disconnected,
+		Read
+	};
+
+	static boost::shared_ptr<SimpleConnectionEvent> Create(SimpleConnectionEventType EventType,
+		boost::shared_ptr<SimpleConnection> Connection, std::vector<char>& Data, unsigned int Length) {
+
+		return boost::shared_ptr<SimpleConnectionEvent>(new SimpleConnectionEvent(EventType, Connection, Data, Length));
+	}
+
+	SimpleConnectionEventType EventType() {
+		return m_eventType;
+	}
+
+	boost::shared_ptr<SimpleConnection> Connection() {
+		return m_connection;
+	}
+
+	std::vector<char>& Data() {
+		return m_data;
+	}
+
+private:
+	SimpleConnectionEvent(SimpleConnectionEventType EventType,
+		boost::shared_ptr<SimpleConnection> Connection, std::vector<char>& Data, unsigned int Length) :
+		m_eventType(EventType),
+		m_connection(Connection) {
+	
+		if(Length > MAX_BUFFER_LENGTH || Length > Data.size()) {
+			return;
+		}
+
+		m_data.resize(Length);
+		memcpy_s(m_data.data(), m_data.size(), Data.data(), Length);
+	};
+
+	SimpleConnectionEventType m_eventType;
+	boost::shared_ptr<SimpleConnection> m_connection;
+	std::vector<char> m_data;
+};
+
 class SimpleConnection : public boost::enable_shared_from_this<SimpleConnection> {
 public:
-	static boost::shared_ptr<SimpleConnection> create(boost::asio::io_service& IoService) {
-		return boost::shared_ptr<SimpleConnection>(new SimpleConnection(IoService));
+	static boost::shared_ptr<SimpleConnection> Create(boost::asio::io_service& IoService,
+		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) {
+
+		return boost::shared_ptr<SimpleConnection>(new SimpleConnection(IoService, Callback));
 	}
 
 	boost::asio::ip::tcp::socket& Socket() {
@@ -38,17 +87,29 @@ public:
 
 	void Stop();
 
-	void Write(char* Buffer, unsigned int Length);
+	void Write(std::vector<char>& Buffer);
 
 private:
-	SimpleConnection(boost::asio::io_service& IoService) : m_socket(IoService) {};
+	SimpleConnection(boost::asio::io_service& IoService,
+		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
+		m_socket(IoService),
+		m_callback(Callback) {
+	
+		m_readBuffer.resize(MAX_BUFFER_LENGTH);
+	};
+
+	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
+		if(m_callback) {
+			m_callback(ConnectionEvent);
+		}
+	}
 
 	void HandleRead(const boost::system::error_code& Error, size_t BytesTransferred);
 
 	void HandleWrite(const boost::system::error_code& Error, size_t BytesTransferred);
 
 	boost::asio::ip::tcp::socket m_socket;
-	std::string m_message;
-	char m_readBuffer[MAX_BUFFER_LENGTH];
-	char m_writeBuffer[MAX_BUFFER_LENGTH];
+	std::vector<char> m_readBuffer;
+	std::vector<char> m_writeBuffer;
+	void(*m_callback)(boost::shared_ptr<SimpleConnectionEvent>);
 };

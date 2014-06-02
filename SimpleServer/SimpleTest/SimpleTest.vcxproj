@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D27709D7-6B6F-4B1B-B550-7DDDE458187B}</ProjectGuid>
-    <RootNamespace>SimpleClient</RootNamespace>
+    <ProjectGuid>{32E11C96-DF46-431C-A5D3-D1C801219F58}</ProjectGuid>
+    <RootNamespace>SimpleTest</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -44,14 +44,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\..\tools\boost_1_55_0\;..\SimpleServer\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\tools\boost_1_55_0\;..\SimpleClient\;..\SimpleServer\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libboost_system-vc120-mt-gd-1_55.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\tools\boost_1_55_0\bin</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libboost_system-vc120-mt-gd-1_55.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -61,26 +62,29 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\..\tools\boost_1_55_0\;..\SimpleServer\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\tools\boost_1_55_0\;..\SimpleClient\;..\SimpleServer\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libboost_system-vc120-mt-1_55.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\tools\boost_1_55_0\bin</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libboost_system-vc120-mt-1_55.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\SimpleClient\SimpleClient.cpp" />
     <ClCompile Include="..\SimpleServer\SimpleConnection.cpp" />
+    <ClCompile Include="..\SimpleServer\SimpleServer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="SimpleClient.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\SimpleClient\SimpleClient.h" />
     <ClInclude Include="..\SimpleServer\SimpleConnection.h" />
-    <ClInclude Include="SimpleClient.h" />
+    <ClInclude Include="..\SimpleServer\SimpleServer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

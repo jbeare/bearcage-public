@@ -16,6 +16,9 @@
 
 #include "SimpleServer.h"
 
+#define BOOST_TEST_MODULE SimpleTest
+#include <boost/test/included/unit_test.hpp>
+
 void ConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
 	switch(ConnectionEvent->EventType()) {
 	case SimpleConnectionEvent::Connected:
@@ -35,25 +38,16 @@ void ConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> Connection
 	}
 }
 
-int main() {
+BOOST_AUTO_TEST_SUITE(SimpleServerTestSuite)
+
+BOOST_AUTO_TEST_CASE(SimpleServerTestCase1) {
 	try {
-		std::vector<char> data;
-		data.resize(5);
-		memcpy_s(data.data(), data.size(), "Hello", 5);
-
-		SimpleServer server(DEFAULT_PORT, &ConnectionEventCallback);
+		SimpleServer server(13, &ConnectionEventCallback);
 		server.Start();
-
-		for(;;) {
-			boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-		}
-
 		server.Stop();
-	} catch (std::exception& e) {
-		std::cerr << e.what() << std::endl;
+	} catch(std::exception& e) {
+		BOOST_CHECK_MESSAGE(false, e.what());
 	}
-
-	system("pause");
-
-	return 0;
 }
+
+BOOST_AUTO_TEST_SUITE_END()

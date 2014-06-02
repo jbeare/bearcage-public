@@ -17,7 +17,7 @@
 #include "SimpleConnection.h"
 
 void SimpleConnection::Start() {
-	Socket().async_read_some(boost::asio::buffer(m_readBuffer, MAX_BUFFER_LENGTH),
+	Socket().async_read_some(boost::asio::buffer(m_readBuffer),
 		boost::bind(&SimpleConnection::HandleRead, shared_from_this(),
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred));
@@ -27,16 +27,13 @@ void SimpleConnection::Stop() {
 
 }
 
-void SimpleConnection::Write(char* Buffer, unsigned int Length) {
-	if(!Buffer || !Length || Length > MAX_BUFFER_LENGTH) {
+void SimpleConnection::Write(std::vector<char>& Buffer) {
+	if(Buffer.size() > MAX_BUFFER_LENGTH) {
 		return;
 	}
 
-	if(memcpy_s(m_writeBuffer, MAX_BUFFER_LENGTH, Buffer, Length)) {
-		return;
-	}
-
-	boost::asio::async_write(m_socket, boost::asio::buffer(Buffer, Length),
+	m_writeBuffer = Buffer;
+	boost::asio::async_write(m_socket, boost::asio::buffer(m_writeBuffer),
 		boost::bind(&SimpleConnection::HandleWrite, shared_from_this(),
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred));
@@ -44,21 +41,27 @@ void SimpleConnection::Write(char* Buffer, unsigned int Length) {
 
 void SimpleConnection::HandleRead(const boost::system::error_code& Error, size_t BytesTransferred) {
 	if(Error.value() == boost::system::errc::success) {
-		std::cout.write(m_readBuffer, BytesTransferred);
-		std::cout << std::endl;
+		if(BytesTransferred) {
+			boost::shared_ptr<SimpleConnectionEvent> connectionEvent =
+				SimpleConnectionEvent::Create(SimpleConnectionEvent::Read, shared_from_this(), m_readBuffer, BytesTransferred);
+			Callback(connectionEvent);
+		}
 
-		Socket().async_read_some(boost::asio::buffer(m_readBuffer, MAX_BUFFER_LENGTH),
+		Socket().async_read_some(boost::asio::buffer(m_readBuffer),
 			boost::bind(&SimpleConnection::HandleRead, shared_from_this(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
-
-		Write(m_readBuffer, BytesTransferred);
 	} else {
-		std::cout << "Read failure" << std::endl;
+		boost::shared_ptr<SimpleConnectionEvent> connectionEvent = 
+			SimpleConnectionEvent::Create(SimpleConnectionEvent::Disconnected, shared_from_this(), std::vector<char>(), 0);
+		Callback(connectionEvent);
 	}
 }
 
 void SimpleConnection::HandleWrite(const boost::system::error_code& Error, size_t BytesTransferred) {
-	UNREFERENCED_PARAMETER(Error);
-	UNREFERENCED_PARAMETER(BytesTransferred);
+	if(Error.value() == boost::system::errc::success) {
+		std::cout << "Wrote bytes: " << BytesTransferred << std::endl;
+	} else {
+		std::cout << "Encountered an error writing: " << Error.message() << std::endl;
+	}
 }

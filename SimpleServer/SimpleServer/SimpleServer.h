@@ -16,13 +16,15 @@
 
 #pragma once
 
+#include <boost/thread.hpp>
 #include "SimpleConnection.h"
 
 class SimpleServer {
 public:
-	SimpleServer(unsigned short Port) : 
+	SimpleServer(unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
 		m_ioService(),
-		m_acceptor(m_ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), Port)) {};
+		m_acceptor(m_ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), Port)),
+		m_callback(Callback) {};
 
 	void Start();
 
@@ -31,8 +33,18 @@ public:
 private:
 	void AcceptConnection();
 
+	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
+		if(m_callback) {
+			m_callback(ConnectionEvent);
+		}
+	}
+
 	void HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, const boost::system::error_code& Error);
+
+	void StartThread();
 
 	boost::asio::io_service m_ioService;
 	boost::asio::ip::tcp::acceptor m_acceptor;
+	boost::thread m_thread;
+	void (*m_callback)(boost::shared_ptr<SimpleConnectionEvent>);
 };

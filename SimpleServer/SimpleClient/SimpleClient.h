@@ -16,25 +16,37 @@
 
 #pragma once
 
+#include <boost/thread.hpp>
 #include "SimpleConnection.h"
 
 class SimpleClient {
 public:
-	SimpleClient(char* Host, unsigned short Port) :
+	SimpleClient(char* Host, unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
 		m_ioService(),
 		m_query(boost::asio::ip::tcp::v4(), std::string(Host), std::to_string(Port)),
-		m_resolver(m_ioService) {};
+		m_resolver(m_ioService),
+		m_callback(Callback) {};
 
 	void Start();
 
 	void Stop();
 
 private:
+	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
+		if(m_callback) {
+			m_callback(ConnectionEvent);
+		}
+	}
+
 	void HandleResolve(const boost::system::error_code& Error, boost::asio::ip::tcp::resolver::iterator Iterator);
 
 	void HandleConnect(boost::shared_ptr<SimpleConnection> Connection, const boost::system::error_code& Error);
 
+	void StartThread();
+
 	boost::asio::io_service m_ioService;
 	boost::asio::ip::tcp::resolver::query m_query;
 	boost::asio::ip::tcp::resolver m_resolver;
+	boost::thread m_thread;
+	void(*m_callback)(boost::shared_ptr<SimpleConnectionEvent>);
 };

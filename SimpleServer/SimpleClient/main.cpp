@@ -16,10 +16,46 @@
 
 #include "SimpleClient.h"
 
+boost::shared_ptr<SimpleConnection> g_connection;
+
+void ConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
+	switch(ConnectionEvent->EventType()) {
+	case SimpleConnectionEvent::Connected:
+		std::cout << "ConnectionEventCallback: Connected" << std::endl;
+		g_connection = ConnectionEvent->Connection();
+		break;
+	case SimpleConnectionEvent::Disconnected:
+		std::cout << "ConnectionEventCallback: Disconnected" << std::endl;
+		g_connection.reset();
+		break;
+	case SimpleConnectionEvent::Read:
+		std::cout << "ConnectionEventCallback: Read" << std::endl;
+		std::cout.write(ConnectionEvent->Data().data(), ConnectionEvent->Data().size());
+		std::cout << std::endl;
+		break;
+	default:
+		break;
+	}
+}
+
 int main(int argc, char* argv[]) {
 	try {
-		SimpleClient client("localhost", DEFAULT_PORT);
+		std::vector<char> data;
+		data.resize(5);
+		memcpy_s(data.data(), data.size(), "Hello", 5);
+
+		SimpleClient client("localhost", DEFAULT_PORT, &ConnectionEventCallback);
 		client.Start();
+
+		for(;;) {
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+
+			if(g_connection) {
+				g_connection->Write(data);
+			}
+		}
+
+		client.Stop();
 	} catch(std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	}
