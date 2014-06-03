@@ -15,6 +15,9 @@
 ******************************************************************************/
 
 #include "SimpleServer.h"
+#include "Utility.h"
+
+ConfigurationManager G_CONFIG;
 
 #define BOOST_TEST_MODULE SimpleTest
 #include <boost/test/included/unit_test.hpp>
@@ -41,13 +44,19 @@ void ConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> Connection
 BOOST_AUTO_TEST_SUITE(SimpleServerTestSuite)
 
 BOOST_AUTO_TEST_CASE(SimpleServerTestCase1) {
+	BOOST_CHECK_EQUAL(UT_CLASS_COUNT("SimpleServer"), 0);
+
 	try {
 		SimpleServer server(13, &ConnectionEventCallback);
+		BOOST_CHECK_EQUAL(UT_CLASS_COUNT("SimpleServer"), 1);
 		server.Start();
 		server.Stop();
+		BOOST_CHECK_EQUAL(UT_CLASS_COUNT("SimpleServer"), 1);
 	} catch(std::exception& e) {
 		BOOST_CHECK_MESSAGE(false, e.what());
 	}
+
+	BOOST_CHECK_EQUAL(UT_CLASS_COUNT("SimpleServer"), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

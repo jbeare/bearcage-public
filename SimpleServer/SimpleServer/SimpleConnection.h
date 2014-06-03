@@ -16,10 +16,12 @@
 
 #pragma once
 
+#include <vector>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+#include "Utility.h"
 
 #define MAX_BUFFER_LENGTH 1024
 #define DEFAULT_PORT 13

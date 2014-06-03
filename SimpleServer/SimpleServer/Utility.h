@@ -16,42 +16,52 @@
 
 #pragma once
 
-#include <boost/thread.hpp>
-#include "SimpleConnection.h"
+#ifndef UNIT_TESTS_ENABLED
 
-class SimpleServer {
+#define UT_CLASS_CONSTRUCTED(_NAME_)
+#define UT_CLASS_DESTROYED(_NAME_)
+#define UT_CLASS_COUNT(_NAME_)
+
+#else
+
+#define UT_CLASS_CONSTRUCTED(_NAME_) {G_CONFIG.Lock(); G_CONFIG.Set(_NAME_, G_CONFIG.Get(_NAME_) + 1); G_CONFIG.Unlock();}
+#define UT_CLASS_DESTROYED(_NAME_) {G_CONFIG.Lock(); G_CONFIG.Set(_NAME_, G_CONFIG.Get(_NAME_) - 1); G_CONFIG.Unlock();}
+#define UT_CLASS_COUNT(_NAME_) G_CONFIG.Get(_NAME_)
+
+#include <map>
+#include <boost/thread/recursive_mutex.hpp>
+#include <boost/thread/locks.hpp>
+
+class ConfigurationManager {
 public:
-	SimpleServer(unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
-		m_ioService(),
-		m_acceptor(m_ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), Port)),
-		m_callback(Callback) {
-	
-		UT_CLASS_CONSTRUCTED("SimpleServer");
-	};
-
-	~SimpleServer() {
-		UT_CLASS_DESTROYED("SimpleServer");
-	};
-
-	void Start();
-
-	void Stop();
-
-private:
-	void AcceptConnection();
-
-	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
-		if(m_callback) {
-			m_callback(ConnectionEvent);
-		}
+	int Get(std::string Key) {
+		boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
+		return m_configurationMap[Key];
 	}
 
-	void HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, const boost::system::error_code& Error);
+	void Set(std::string Key, int Value) {
+		boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
+		m_configurationMap[Key] = Value;
+	}
 
-	void StartThread();
+	void Clear() {
+		boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
+		m_configurationMap.clear();
+	}
 
-	boost::asio::io_service m_ioService;
-	boost::asio::ip::tcp::acceptor m_acceptor;
-	boost::thread m_thread;
-	void (*m_callback)(boost::shared_ptr<SimpleConnectionEvent>);
+	void Lock() {
+		m_mutex.lock();
+	}
+
+	void Unlock() {
+		m_mutex.unlock();
+	}
+
+private:
+	std::map<std::string, int> m_configurationMap;
+	boost::recursive_mutex m_mutex;
 };
+
+extern ConfigurationManager G_CONFIG;
+
+#endif

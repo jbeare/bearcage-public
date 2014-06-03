@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <string>
 #include <boost/thread.hpp>
 #include "SimpleConnection.h"
 
