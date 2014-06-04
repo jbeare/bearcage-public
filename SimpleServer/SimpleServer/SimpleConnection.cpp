@@ -17,17 +17,27 @@
 #include "SimpleConnection.h"
 
 void SimpleConnection::Start() {
-	Socket().async_read_some(boost::asio::buffer(m_readBuffer),
+	if(m_started) {
+		return;
+	}
+
+	m_started = true;
+	m_socket.async_read_some(boost::asio::buffer(m_readBuffer),
 		boost::bind(&SimpleConnection::HandleRead, shared_from_this(),
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred));
 }
 
 void SimpleConnection::Stop() {
-
+	m_started = false;
+	m_socket.close();
 }
 
 void SimpleConnection::Write(std::vector<char>& Buffer) {
+	if(!m_started) {
+		return;
+	}
+
 	if(Buffer.size() > MAX_BUFFER_LENGTH) {
 		return;
 	}
@@ -59,9 +69,6 @@ void SimpleConnection::HandleRead(const boost::system::error_code& Error, size_t
 }
 
 void SimpleConnection::HandleWrite(const boost::system::error_code& Error, size_t BytesTransferred) {
-	if(Error.value() == boost::system::errc::success) {
-		std::cout << "Wrote bytes: " << BytesTransferred << std::endl;
-	} else {
-		std::cout << "Encountered an error writing: " << Error.message() << std::endl;
-	}
+	UNREFERENCED_PARAMETER(Error);
+	UNREFERENCED_PARAMETER(BytesTransferred);
 }

@@ -24,7 +24,8 @@ public:
 	SimpleServer(unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
 		m_ioService(),
 		m_acceptor(m_ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), Port)),
-		m_callback(Callback) {
+		m_callback(Callback),
+		m_started(false) {
 	
 		UT_CLASS_CONSTRUCTED("SimpleServer");
 	};
@@ -38,6 +39,9 @@ public:
 	void Stop();
 
 private:
+	SimpleServer& operator=(const SimpleServer&) = delete;
+	SimpleServer(const SimpleServer&) = delete;
+
 	void AcceptConnection();
 
 	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
@@ -54,4 +58,7 @@ private:
 	boost::asio::ip::tcp::acceptor m_acceptor;
 	boost::thread m_thread;
 	void (*m_callback)(boost::shared_ptr<SimpleConnectionEvent>);
+	boost::recursive_mutex m_mutex;
+	boost::atomic<bool> m_started;
+	std::vector<boost::shared_ptr<SimpleConnection>> m_connections;
 };

@@ -79,6 +79,7 @@
     <ClCompile Include="..\SimpleClient\SimpleClient.cpp" />
     <ClCompile Include="..\SimpleServer\SimpleConnection.cpp" />
     <ClCompile Include="..\SimpleServer\SimpleServer.cpp" />
+    <ClCompile Include="..\SimpleServer\Utility.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

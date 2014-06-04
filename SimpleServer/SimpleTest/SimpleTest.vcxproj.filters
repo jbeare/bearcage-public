@@ -27,6 +27,9 @@
     <ClCompile Include="..\SimpleClient\SimpleClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\SimpleServer\Utility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SimpleServer\SimpleConnection.h">

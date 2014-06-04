@@ -17,6 +17,7 @@
 #pragma once
 
 #include <vector>
+#include <boost/atomic.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -54,6 +55,10 @@ public:
 		return m_data;
 	}
 
+	~SimpleConnectionEvent() {
+		UT_CLASS_DESTROYED("SimpleConnectionEvent");
+	}
+
 private:
 	SimpleConnectionEvent(SimpleConnectionEventType EventType,
 		boost::shared_ptr<SimpleConnection> Connection, std::vector<char>& Data, unsigned int Length) :
@@ -66,7 +71,11 @@ private:
 
 		m_data.resize(Length);
 		memcpy_s(m_data.data(), m_data.size(), Data.data(), Length);
+		UT_CLASS_CONSTRUCTED("SimpleConnectionEvent");
 	};
+
+	SimpleConnectionEvent& operator=(const SimpleConnectionEvent&) = delete;
+	SimpleConnectionEvent(const SimpleConnectionEvent&) = delete;
 
 	SimpleConnectionEventType m_eventType;
 	boost::shared_ptr<SimpleConnection> m_connection;
@@ -91,14 +100,23 @@ public:
 
 	void Write(std::vector<char>& Buffer);
 
+	~SimpleConnection() {
+		UT_CLASS_DESTROYED("SimpleConnection");
+	}
+
 private:
 	SimpleConnection(boost::asio::io_service& IoService,
 		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
 		m_socket(IoService),
-		m_callback(Callback) {
+		m_callback(Callback),
+		m_started(false) {
 	
 		m_readBuffer.resize(MAX_BUFFER_LENGTH);
+		UT_CLASS_CONSTRUCTED("SimpleConnection");
 	};
+
+	SimpleConnection& operator=(const SimpleConnection&) = delete;
+	SimpleConnection(const SimpleConnection&) = delete;
 
 	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
 		if(m_callback) {
@@ -114,4 +132,5 @@ private:
 	std::vector<char> m_readBuffer;
 	std::vector<char> m_writeBuffer;
 	void(*m_callback)(boost::shared_ptr<SimpleConnectionEvent>);
+	boost::atomic<bool> m_started;
 };

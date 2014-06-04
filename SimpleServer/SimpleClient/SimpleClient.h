@@ -26,13 +26,25 @@ public:
 		m_ioService(),
 		m_query(boost::asio::ip::tcp::v4(), std::string(Host), std::to_string(Port)),
 		m_resolver(m_ioService),
-		m_callback(Callback) {};
+		m_callback(Callback),
+		m_started(false),
+		m_connection(NULL) {
+	
+		UT_CLASS_CONSTRUCTED("SimpleClient");
+	};
+
+	~SimpleClient() {
+		UT_CLASS_DESTROYED("SimpleClient");
+	}
 
 	void Start();
 
 	void Stop();
 
 private:
+	SimpleClient& operator=(const SimpleClient&) = delete;
+	SimpleClient(const SimpleClient&) = delete;
+
 	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
 		if(m_callback) {
 			m_callback(ConnectionEvent);
@@ -50,4 +62,7 @@ private:
 	boost::asio::ip::tcp::resolver m_resolver;
 	boost::thread m_thread;
 	void(*m_callback)(boost::shared_ptr<SimpleConnectionEvent>);
+	boost::recursive_mutex m_mutex;
+	boost::atomic<bool> m_started;
+	boost::shared_ptr<SimpleConnection> m_connection;
 };
