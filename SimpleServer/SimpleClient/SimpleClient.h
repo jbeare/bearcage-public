@@ -30,16 +30,23 @@ public:
 		m_started(false),
 		m_connection(NULL) {
 	
-		UT_CLASS_CONSTRUCTED("SimpleClient");
+		UT_STAT_INCREMENT("SimpleClient");
 	};
 
 	~SimpleClient() {
-		UT_CLASS_DESTROYED("SimpleClient");
+		UT_STAT_DECREMENT("SimpleClient");
 	}
 
 	void Start();
 
 	void Stop();
+
+	void Write(std::vector<char>& Buffer) {
+		boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
+		if(m_connection) {
+			m_connection->Write(Buffer);
+		}
+	}
 
 private:
 	SimpleClient& operator=(const SimpleClient&) = delete;

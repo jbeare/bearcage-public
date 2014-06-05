@@ -27,11 +27,11 @@ public:
 		m_callback(Callback),
 		m_started(false) {
 	
-		UT_CLASS_CONSTRUCTED("SimpleServer");
+		UT_STAT_INCREMENT("SimpleServer");
 	};
 
 	~SimpleServer() {
-		UT_CLASS_DESTROYED("SimpleServer");
+		UT_STAT_DECREMENT("SimpleServer");
 	};
 
 	void Start();

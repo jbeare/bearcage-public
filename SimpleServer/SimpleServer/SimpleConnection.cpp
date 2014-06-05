@@ -43,10 +43,8 @@ void SimpleConnection::Write(std::vector<char>& Buffer) {
 	}
 
 	m_writeBuffer = Buffer;
-	boost::asio::async_write(m_socket, boost::asio::buffer(m_writeBuffer),
-		boost::bind(&SimpleConnection::HandleWrite, shared_from_this(),
-		boost::asio::placeholders::error,
-		boost::asio::placeholders::bytes_transferred));
+	//TODO: Need to add a thread and buffer queue to implement write_async
+	boost::asio::write(m_socket, boost::asio::buffer(m_writeBuffer));
 }
 
 void SimpleConnection::HandleRead(const boost::system::error_code& Error, size_t BytesTransferred) {

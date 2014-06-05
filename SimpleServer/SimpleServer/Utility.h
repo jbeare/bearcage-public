@@ -54,14 +54,22 @@ extern ConfigurationManager G_CONFIG;
 
 #ifndef UNIT_TESTS_ENABLED
 
-#define UT_CLASS_CONSTRUCTED(_NAME_)
-#define UT_CLASS_DESTROYED(_NAME_)
-#define UT_CLASS_COUNT(_NAME_)
+#define UT_STAT_INCREMENT(_NAME_)
+#define UT_STAT_DECREMENT(_NAME_)
+#define UT_STAT_ADD(_NAME_, _INC_)
+#define UT_STAT_SUB(_NAME_, _INC_)
+#define UT_STAT_COUNT(_NAME_)
+#define UT_STAT_RESET(_NAME_)
+#define UT_STAT_RESET_ALL()
 
 #else
 
-#define UT_CLASS_CONSTRUCTED(_NAME_) {G_CONFIG.Lock(); G_CONFIG.Set(_NAME_, G_CONFIG.Get(_NAME_) + 1); G_CONFIG.Unlock();}
-#define UT_CLASS_DESTROYED(_NAME_) {G_CONFIG.Lock(); G_CONFIG.Set(_NAME_, G_CONFIG.Get(_NAME_) - 1); G_CONFIG.Unlock();}
-#define UT_CLASS_COUNT(_NAME_) G_CONFIG.Get(_NAME_)
+#define UT_STAT_INCREMENT(_NAME_) {G_CONFIG.Lock(); G_CONFIG.Set(_NAME_, G_CONFIG.Get(_NAME_) + 1); G_CONFIG.Unlock();}
+#define UT_STAT_DECREMENT(_NAME_) {G_CONFIG.Lock(); G_CONFIG.Set(_NAME_, G_CONFIG.Get(_NAME_) - 1); G_CONFIG.Unlock();}
+#define UT_STAT_ADD(_NAME_, _INC_) {G_CONFIG.Lock(); G_CONFIG.Set(_NAME_, G_CONFIG.Get(_NAME_) + _INC_); G_CONFIG.Unlock();}
+#define UT_STAT_SUB(_NAME_, _INC_) {G_CONFIG.Lock(); G_CONFIG.Set(_NAME_, G_CONFIG.Get(_NAME_) - _INC_); G_CONFIG.Unlock();}
+#define UT_STAT_COUNT(_NAME_) G_CONFIG.Get(_NAME_)
+#define UT_STAT_RESET(_NAME_) G_CONFIG.Set(_NAME_, 0)
+#define UT_STAT_RESET_ALL() G_CONFIG.Clear()
 
 #endif

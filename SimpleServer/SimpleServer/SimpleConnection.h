@@ -24,7 +24,7 @@
 #include <boost/asio.hpp>
 #include "Utility.h"
 
-#define MAX_BUFFER_LENGTH 1024
+#define MAX_BUFFER_LENGTH 1000
 #define DEFAULT_PORT 13
 
 class SimpleConnection;
@@ -56,7 +56,7 @@ public:
 	}
 
 	~SimpleConnectionEvent() {
-		UT_CLASS_DESTROYED("SimpleConnectionEvent");
+		UT_STAT_DECREMENT("SimpleConnectionEvent");
 	}
 
 private:
@@ -71,7 +71,7 @@ private:
 
 		m_data.resize(Length);
 		memcpy_s(m_data.data(), m_data.size(), Data.data(), Length);
-		UT_CLASS_CONSTRUCTED("SimpleConnectionEvent");
+		UT_STAT_INCREMENT("SimpleConnectionEvent");
 	};
 
 	SimpleConnectionEvent& operator=(const SimpleConnectionEvent&) = delete;
@@ -101,7 +101,7 @@ public:
 	void Write(std::vector<char>& Buffer);
 
 	~SimpleConnection() {
-		UT_CLASS_DESTROYED("SimpleConnection");
+		UT_STAT_DECREMENT("SimpleConnection");
 	}
 
 private:
@@ -112,7 +112,7 @@ private:
 		m_started(false) {
 	
 		m_readBuffer.resize(MAX_BUFFER_LENGTH);
-		UT_CLASS_CONSTRUCTED("SimpleConnection");
+		UT_STAT_INCREMENT("SimpleConnection");
 	};
 
 	SimpleConnection& operator=(const SimpleConnection&) = delete;
