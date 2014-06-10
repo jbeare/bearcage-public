@@ -38,7 +38,7 @@ public:
 	};
 
 	static boost::shared_ptr<SimpleConnectionEvent> Create(SimpleConnectionEventType EventType,
-		boost::shared_ptr<SimpleConnection> Connection, std::vector<char>& Data, unsigned int Length) {
+		boost::shared_ptr<SimpleConnection> const &Connection, std::vector<char> const &Data, unsigned int Length) {
 
 		return boost::shared_ptr<SimpleConnectionEvent>(new SimpleConnectionEvent(EventType, Connection, Data, Length));
 	}
@@ -51,7 +51,7 @@ public:
 		return m_connection;
 	}
 
-	std::vector<char>& Data() {
+	std::vector<char> const &Data() {
 		return m_data;
 	}
 
@@ -61,7 +61,7 @@ public:
 
 private:
 	SimpleConnectionEvent(SimpleConnectionEventType EventType,
-		boost::shared_ptr<SimpleConnection> Connection, std::vector<char>& Data, unsigned int Length) :
+		boost::shared_ptr<SimpleConnection> const &Connection, std::vector<char> const &Data, unsigned int Length) :
 		m_eventType(EventType),
 		m_connection(Connection) {
 	
@@ -74,8 +74,8 @@ private:
 		UT_STAT_INCREMENT("SimpleConnectionEvent");
 	};
 
-	SimpleConnectionEvent& operator=(const SimpleConnectionEvent&) = delete;
-	SimpleConnectionEvent(const SimpleConnectionEvent&) = delete;
+	SimpleConnectionEvent &operator=(SimpleConnectionEvent const &) = delete;
+	SimpleConnectionEvent(SimpleConnectionEvent const &) = delete;
 
 	SimpleConnectionEventType m_eventType;
 	boost::shared_ptr<SimpleConnection> m_connection;
@@ -84,13 +84,13 @@ private:
 
 class SimpleConnection : public boost::enable_shared_from_this<SimpleConnection> {
 public:
-	static boost::shared_ptr<SimpleConnection> Create(boost::asio::io_service& IoService,
+	static boost::shared_ptr<SimpleConnection> Create(boost::asio::io_service &IoService,
 		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) {
 
 		return boost::shared_ptr<SimpleConnection>(new SimpleConnection(IoService, Callback));
 	}
 
-	boost::asio::ip::tcp::socket& Socket() {
+	boost::asio::ip::tcp::socket &Socket() {
 		return m_socket;
 	}
 
@@ -98,14 +98,14 @@ public:
 
 	void Stop();
 
-	void Write(std::vector<char>& Buffer);
+	void Write(std::vector<char> const &Buffer);
 
 	~SimpleConnection() {
 		UT_STAT_DECREMENT("SimpleConnection");
 	}
 
 private:
-	SimpleConnection(boost::asio::io_service& IoService,
+	SimpleConnection(boost::asio::io_service &IoService,
 		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
 		m_socket(IoService),
 		m_callback(Callback),
@@ -115,8 +115,8 @@ private:
 		UT_STAT_INCREMENT("SimpleConnection");
 	};
 
-	SimpleConnection& operator=(const SimpleConnection&) = delete;
-	SimpleConnection(const SimpleConnection&) = delete;
+	SimpleConnection &operator=(SimpleConnection const &) = delete;
+	SimpleConnection(SimpleConnection const &) = delete;
 
 	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
 		if(m_callback) {
@@ -124,9 +124,9 @@ private:
 		}
 	}
 
-	void HandleRead(const boost::system::error_code& Error, size_t BytesTransferred);
+	void HandleRead(boost::system::error_code const &Error, size_t BytesTransferred);
 
-	void HandleWrite(const boost::system::error_code& Error, size_t BytesTransferred);
+	void HandleWrite(boost::system::error_code const &Error, size_t BytesTransferred);
 
 	boost::asio::ip::tcp::socket m_socket;
 	std::vector<char> m_readBuffer;

@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClCompile Include="..\SimpleClient\SimpleClient.cpp" />
     <ClCompile Include="..\SimpleServer\SimpleConnection.cpp" />
+    <ClCompile Include="..\SimpleServer\SimpleConnectionManager.cpp" />
     <ClCompile Include="..\SimpleServer\SimpleServer.cpp" />
     <ClCompile Include="..\SimpleServer\Utility.cpp" />
     <ClCompile Include="main.cpp" />
@@ -85,6 +86,7 @@
   <ItemGroup>
     <ClInclude Include="..\SimpleClient\SimpleClient.h" />
     <ClInclude Include="..\SimpleServer\SimpleConnection.h" />
+    <ClInclude Include="..\SimpleServer\SimpleConnectionManager.h" />
     <ClInclude Include="..\SimpleServer\SimpleServer.h" />
     <ClInclude Include="..\SimpleServer\Utility.h" />
   </ItemGroup>

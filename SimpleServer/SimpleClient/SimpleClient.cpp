@@ -17,15 +17,13 @@
 #include "SimpleClient.h"
 
 void SimpleClient::Start() {
-	{
-		boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
+	boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
 
-		if(m_started) {
-			return;
-		}
-
-		m_started = true;
+	if(m_started) {
+		return;
 	}
+
+	m_started = true;
 
 	m_thread = boost::thread(boost::bind(&SimpleClient::StartThread, this));
 }
@@ -46,7 +44,7 @@ void SimpleClient::Stop() {
 	m_ioService.reset();
 }
 
-void SimpleClient::HandleResolve(const boost::system::error_code& Error, boost::asio::ip::tcp::resolver::iterator Iterator) {
+void SimpleClient::HandleResolve(boost::system::error_code const &Error, boost::asio::ip::tcp::resolver::iterator Iterator) {
 	if(!Error) {
 		boost::shared_ptr<SimpleConnection> connection = SimpleConnection::Create(m_ioService, m_callback);
 		connection->Socket().async_connect(*Iterator,
@@ -55,7 +53,7 @@ void SimpleClient::HandleResolve(const boost::system::error_code& Error, boost::
 	}
 }
 
-void SimpleClient::HandleConnect(boost::shared_ptr<SimpleConnection> Connection, const boost::system::error_code& Error) {
+void SimpleClient::HandleConnect(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error) {
 	if(!Error) {
 		boost::shared_ptr<SimpleConnectionEvent> connectionEvent =
 			SimpleConnectionEvent::Create(SimpleConnectionEvent::Connected, Connection, std::vector<char>(), 0);

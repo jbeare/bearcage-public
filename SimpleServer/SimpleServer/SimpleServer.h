@@ -39,8 +39,8 @@ public:
 	void Stop();
 
 private:
-	SimpleServer& operator=(const SimpleServer&) = delete;
-	SimpleServer(const SimpleServer&) = delete;
+	SimpleServer& operator=(SimpleServer const &) = delete;
+	SimpleServer(SimpleServer const &) = delete;
 
 	void AcceptConnection();
 
@@ -50,7 +50,7 @@ private:
 		}
 	}
 
-	void HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, const boost::system::error_code& Error);
+	void HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error);
 
 	void StartThread();
 

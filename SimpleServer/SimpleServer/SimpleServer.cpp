@@ -17,14 +17,12 @@
 #include "SimpleServer.h"
 
 void SimpleServer::Start() {
-	{
-		boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
-		if(m_started) {
-			return;
-		}
-
-		m_started = true;
+	boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
+	if(m_started) {
+		return;
 	}
+
+	m_started = true;
 
 	m_thread = boost::thread(boost::bind(&SimpleServer::StartThread, this));
 }
@@ -61,7 +59,7 @@ void SimpleServer::AcceptConnection() {
 		boost::asio::placeholders::error));
 }
 
-void SimpleServer::HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, const boost::system::error_code& Error) {
+void SimpleServer::HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error) {
 	if(!Error) {
 		boost::shared_ptr<SimpleConnectionEvent> connectionEvent =
 			SimpleConnectionEvent::Create(SimpleConnectionEvent::Connected, Connection, std::vector<char>(), 0);

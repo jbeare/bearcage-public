@@ -22,9 +22,9 @@
 
 class SimpleClient {
 public:
-	SimpleClient(char* Host, unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
+	SimpleClient(std::string const &Host, unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
 		m_ioService(),
-		m_query(boost::asio::ip::tcp::v4(), std::string(Host), std::to_string(Port)),
+		m_query(boost::asio::ip::tcp::v4(), Host, std::to_string(Port)),
 		m_resolver(m_ioService),
 		m_callback(Callback),
 		m_started(false),
@@ -41,7 +41,7 @@ public:
 
 	void Stop();
 
-	void Write(std::vector<char>& Buffer) {
+	void Write(std::vector<char> const &Buffer) {
 		boost::lock_guard<boost::recursive_mutex> lock(m_mutex);
 		if(m_connection) {
 			m_connection->Write(Buffer);
@@ -49,8 +49,8 @@ public:
 	}
 
 private:
-	SimpleClient& operator=(const SimpleClient&) = delete;
-	SimpleClient(const SimpleClient&) = delete;
+	SimpleClient& operator=(SimpleClient const &) = delete;
+	SimpleClient(SimpleClient const &) = delete;
 
 	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
 		if(m_callback) {
@@ -58,9 +58,9 @@ private:
 		}
 	}
 
-	void HandleResolve(const boost::system::error_code& Error, boost::asio::ip::tcp::resolver::iterator Iterator);
+	void HandleResolve(boost::system::error_code const &Error, boost::asio::ip::tcp::resolver::iterator Iterator);
 
-	void HandleConnect(boost::shared_ptr<SimpleConnection> Connection, const boost::system::error_code& Error);
+	void HandleConnect(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error);
 
 	void StartThread();
 

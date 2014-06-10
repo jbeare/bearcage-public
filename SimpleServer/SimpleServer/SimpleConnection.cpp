@@ -33,7 +33,7 @@ void SimpleConnection::Stop() {
 	m_socket.close();
 }
 
-void SimpleConnection::Write(std::vector<char>& Buffer) {
+void SimpleConnection::Write(std::vector<char> const &Buffer) {
 	if(!m_started) {
 		return;
 	}
@@ -47,7 +47,7 @@ void SimpleConnection::Write(std::vector<char>& Buffer) {
 	boost::asio::write(m_socket, boost::asio::buffer(m_writeBuffer));
 }
 
-void SimpleConnection::HandleRead(const boost::system::error_code& Error, size_t BytesTransferred) {
+void SimpleConnection::HandleRead(boost::system::error_code const &Error, size_t BytesTransferred) {
 	if(Error.value() == boost::system::errc::success) {
 		if(BytesTransferred) {
 			boost::shared_ptr<SimpleConnectionEvent> connectionEvent =
@@ -55,7 +55,7 @@ void SimpleConnection::HandleRead(const boost::system::error_code& Error, size_t
 			Callback(connectionEvent);
 		}
 
-		Socket().async_read_some(boost::asio::buffer(m_readBuffer),
+		m_socket.async_read_some(boost::asio::buffer(m_readBuffer),
 			boost::bind(&SimpleConnection::HandleRead, shared_from_this(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
@@ -66,7 +66,7 @@ void SimpleConnection::HandleRead(const boost::system::error_code& Error, size_t
 	}
 }
 
-void SimpleConnection::HandleWrite(const boost::system::error_code& Error, size_t BytesTransferred) {
+void SimpleConnection::HandleWrite(boost::system::error_code const &Error, size_t BytesTransferred) {
 	UNREFERENCED_PARAMETER(Error);
 	UNREFERENCED_PARAMETER(BytesTransferred);
 }
