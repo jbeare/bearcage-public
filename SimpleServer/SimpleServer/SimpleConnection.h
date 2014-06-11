@@ -28,6 +28,7 @@
 #define DEFAULT_PORT 13
 
 class SimpleConnection;
+class SimpleConnectionManager;
 
 class SimpleConnectionEvent {
 public:
@@ -90,6 +91,12 @@ public:
 		return boost::shared_ptr<SimpleConnection>(new SimpleConnection(IoService, Callback));
 	}
 
+	static boost::shared_ptr<SimpleConnection> Create(boost::asio::io_service &IoService,
+		SimpleConnectionManager *Parent) {
+
+		return boost::shared_ptr<SimpleConnection>(new SimpleConnection(IoService, Parent));
+	}
+
 	boost::asio::ip::tcp::socket &Socket() {
 		return m_socket;
 	}
@@ -115,14 +122,20 @@ private:
 		UT_STAT_INCREMENT("SimpleConnection");
 	};
 
+	SimpleConnection(boost::asio::io_service &IoService,
+		SimpleConnectionManager *Parent) :
+		m_socket(IoService),
+		m_parent(Parent),
+		m_started(false) {
+
+		m_readBuffer.resize(MAX_BUFFER_LENGTH);
+		UT_STAT_INCREMENT("SimpleConnection");
+	};
+
 	SimpleConnection &operator=(SimpleConnection const &) = delete;
 	SimpleConnection(SimpleConnection const &) = delete;
 
-	void Callback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
-		if(m_callback) {
-			m_callback(ConnectionEvent);
-		}
-	}
+	void ConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent);
 
 	void HandleRead(boost::system::error_code const &Error, size_t BytesTransferred);
 
@@ -133,4 +146,5 @@ private:
 	std::vector<char> m_writeBuffer;
 	void(*m_callback)(boost::shared_ptr<SimpleConnectionEvent>);
 	boost::atomic<bool> m_started;
+	SimpleConnectionManager *m_parent;
 };

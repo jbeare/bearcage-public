@@ -38,10 +38,6 @@ public:
 
 	virtual void Start();
 
-	virtual bool Started() {
-		return m_connectionManagerStarted;
-	}
-
 	virtual void Stop();
 
 protected:
@@ -50,6 +46,8 @@ protected:
 	void AddConnection(boost::shared_ptr<SimpleConnection> const &Connection);
 
 	void RemoveConnection(boost::shared_ptr<SimpleConnection> const &Connection);
+
+	boost::shared_ptr<SimpleConnection> GetConnection(unsigned int Index = 0);
 
 	void ConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent) {
 		if(m_connectionEventCallback) {
@@ -65,12 +63,13 @@ protected:
 		m_ioService.run();
 	}
 
+	void(*m_connectionEventCallback)(boost::shared_ptr<SimpleConnectionEvent>);
+
 private:
 	SimpleConnectionManager& operator=(SimpleConnectionManager const &) = delete;
 	SimpleConnectionManager(SimpleConnectionManager const &) = delete;
 
 	boost::asio::io_service m_ioService;
-	void(*m_connectionEventCallback)(boost::shared_ptr<SimpleConnectionEvent>);
 	boost::thread m_ioServiceThread;
 	boost::atomic<bool> m_connectionManagerStarted;
 	std::vector<boost::shared_ptr<SimpleConnection>> m_connections;

@@ -14,6 +14,7 @@
 **                                                                           **
 ******************************************************************************/
 
+#include "SimpleObject.h"
 #include "SimpleServer.h"
 #include "SimpleClient.h"
 #include "Utility.h"
@@ -321,6 +322,44 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase3) {
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleClient"), 0);
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnection"), 0);
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnectionEvent"), 0);
+}
+
+//Test SimpleObject
+BOOST_AUTO_TEST_CASE(SimpleServerTestCase4) {
+	boost::weak_ptr<SimpleObject> wobj1;
+	boost::weak_ptr<AdvancedObject> wobj2;
+
+	{
+		boost::shared_ptr<SimpleObject> obj1 = SimpleObject::Create();
+		boost::shared_ptr<AdvancedObject> obj2 = AdvancedObject::Create();
+		wobj1 = obj1;
+		wobj2 = obj2;
+
+		{
+			boost::shared_ptr<SimpleObject> pobj1 = obj1->GetSharedPointer();
+			boost::shared_ptr<AdvancedObject> pobj2 = obj2->GetSharedPointer();
+
+			BOOST_CHECK_EQUAL(obj1->WhoAmI(), 0);
+			BOOST_CHECK_EQUAL(obj2->WhoAmI(), 1);
+			BOOST_CHECK_EQUAL(pobj1->WhoAmI(), 0);
+			BOOST_CHECK_EQUAL(pobj2->WhoAmI(), 1);
+
+			BOOST_CHECK_EQUAL(obj1.use_count(), 2);
+			BOOST_CHECK_EQUAL(obj2.use_count(), 2);
+			BOOST_CHECK_EQUAL(pobj1.use_count(), 2);
+			BOOST_CHECK_EQUAL(pobj2.use_count(), 2);
+			BOOST_CHECK_EQUAL(wobj1.use_count(), 2);
+			BOOST_CHECK_EQUAL(wobj2.use_count(), 2);
+		}
+
+		BOOST_CHECK_EQUAL(obj1.use_count(), 1);
+		BOOST_CHECK_EQUAL(obj2.use_count(), 1);
+		BOOST_CHECK_EQUAL(wobj1.use_count(), 1);
+		BOOST_CHECK_EQUAL(wobj2.use_count(), 1);
+	}
+
+	BOOST_CHECK_EQUAL(wobj1.use_count(), 0);
+	BOOST_CHECK_EQUAL(wobj2.use_count(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

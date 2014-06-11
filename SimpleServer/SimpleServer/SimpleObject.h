@@ -16,41 +16,42 @@
 
 #pragma once
 
-#include <boost/thread.hpp>
-#include "SimpleConnectionManager.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
-class SimpleServer : public SimpleConnectionManager {
+#define SIMPLE_CLASS_HEADER(CLASS_NAME); \
+static boost::shared_ptr<CLASS_NAME> Create() { \
+	return boost::shared_ptr<CLASS_NAME>(new CLASS_NAME()); \
+} \
+boost::shared_ptr<CLASS_NAME> GetSharedPointer() { \
+	return boost::dynamic_pointer_cast<CLASS_NAME>(shared_from_this()); \
+}
+
+class SimpleObject : public boost::enable_shared_from_this<SimpleObject> {
 public:
-	SimpleServer(unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
-		m_acceptor(IoService(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), Port)),
-		m_started(false),
-		SimpleConnectionManager(Callback) {
-	
-		UT_STAT_INCREMENT("SimpleServer");
-	};
+	SIMPLE_CLASS_HEADER(SimpleObject);
 
-	~SimpleServer() {
-		UT_STAT_DECREMENT("SimpleServer");
-	};
-
-	virtual void Start();
-
-	virtual void Stop();
-
-private:
-	SimpleServer& operator=(SimpleServer const &) = delete;
-	SimpleServer(SimpleServer const &) = delete;
-
-	void AcceptConnection();
-
-	void HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error);
-
-	virtual void IoServiceThreadEntry() {
-		AcceptConnection();
-		SimpleConnectionManager::IoServiceThreadEntry();
+	int WhoAmI() {
+		return 0;
 	}
 
-	boost::asio::ip::tcp::acceptor m_acceptor;
-	boost::recursive_mutex m_mutex;
-	boost::atomic<bool> m_started;
+	virtual ~SimpleObject() {};
+
+protected:
+	SimpleObject() {};
+};
+
+class AdvancedObject : public SimpleObject {
+public:
+	SIMPLE_CLASS_HEADER(AdvancedObject);
+
+	int WhoAmI() {
+		return 1;
+	}
+
+	virtual ~AdvancedObject() {};
+
+protected:
+	AdvancedObject() {};
 };

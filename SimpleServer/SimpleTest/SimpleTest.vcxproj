@@ -87,6 +87,7 @@
     <ClInclude Include="..\SimpleClient\SimpleClient.h" />
     <ClInclude Include="..\SimpleServer\SimpleConnection.h" />
     <ClInclude Include="..\SimpleServer\SimpleConnectionManager.h" />
+    <ClInclude Include="..\SimpleServer\SimpleObject.h" />
     <ClInclude Include="..\SimpleServer\SimpleServer.h" />
     <ClInclude Include="..\SimpleServer\Utility.h" />
   </ItemGroup>

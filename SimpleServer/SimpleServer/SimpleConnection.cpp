@@ -14,7 +14,7 @@
 **                                                                           **
 ******************************************************************************/
 
-#include "SimpleConnection.h"
+#include "SimpleConnectionManager.h"
 
 void SimpleConnection::Start() {
 	if(m_started) {
@@ -47,12 +47,19 @@ void SimpleConnection::Write(std::vector<char> const &Buffer) {
 	boost::asio::write(m_socket, boost::asio::buffer(m_writeBuffer));
 }
 
+void SimpleConnection::ConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
+	if(m_parent) {
+		m_parent->HandleConnectionEvent(ConnectionEvent);
+	} else if(m_callback) {
+		m_callback(ConnectionEvent);
+	}
+}
+
 void SimpleConnection::HandleRead(boost::system::error_code const &Error, size_t BytesTransferred) {
 	if(Error.value() == boost::system::errc::success) {
 		if(BytesTransferred) {
-			boost::shared_ptr<SimpleConnectionEvent> connectionEvent =
-				SimpleConnectionEvent::Create(SimpleConnectionEvent::Read, shared_from_this(), m_readBuffer, BytesTransferred);
-			Callback(connectionEvent);
+			auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Read, shared_from_this(), m_readBuffer, BytesTransferred);
+			ConnectionEventCallback(connectionEvent);
 		}
 
 		m_socket.async_read_some(boost::asio::buffer(m_readBuffer),
@@ -60,9 +67,8 @@ void SimpleConnection::HandleRead(boost::system::error_code const &Error, size_t
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
 	} else {
-		boost::shared_ptr<SimpleConnectionEvent> connectionEvent = 
-			SimpleConnectionEvent::Create(SimpleConnectionEvent::Disconnected, shared_from_this(), std::vector<char>(), 0);
-		Callback(connectionEvent);
+		auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Disconnected, shared_from_this(), std::vector<char>(), 0);
+		ConnectionEventCallback(connectionEvent);
 	}
 }
 

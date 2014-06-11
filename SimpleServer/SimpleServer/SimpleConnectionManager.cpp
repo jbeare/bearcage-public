@@ -29,20 +29,23 @@ void SimpleConnectionManager::Start() {
 }
 
 void SimpleConnectionManager::Stop() {
-	boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
+	{
+		boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
 
-	if(!m_connectionManagerStarted) {
-		return;
+		if(!m_connectionManagerStarted) {
+			return;
+		}
+
+		m_connectionManagerStarted = false;
+
+		for(auto &connection : m_connections) {
+			connection->Stop();
+		}
+
+		m_connections.clear();
+		m_ioService.stop();
 	}
 
-	m_connectionManagerStarted = false;
-
-	for(auto &connection : m_connections) {
-		connection->Stop();
-	}
-
-	m_connections.clear();
-	m_ioService.stop();
 	m_ioServiceThread.join();
 	m_ioService.reset();
 }
@@ -93,4 +96,14 @@ void SimpleConnectionManager::RemoveConnection(boost::shared_ptr<SimpleConnectio
 	}
 
 	Connection->Stop();
+}
+
+boost::shared_ptr<SimpleConnection> SimpleConnectionManager::GetConnection(unsigned int Index) {
+	boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
+
+	if(Index >= m_connections.size()) {
+		return NULL;
+	}
+
+	return m_connections[Index];
 }
