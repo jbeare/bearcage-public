@@ -21,23 +21,36 @@
 
 class SimpleServer : public SimpleConnectionManager {
 public:
-	SimpleServer(unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
-		m_acceptor(IoService(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), Port)),
-		m_started(false),
-		SimpleConnectionManager(Callback) {
-	
-		UT_STAT_INCREMENT("SimpleServer");
-	};
+	static boost::shared_ptr<SimpleServer> Create(unsigned short Port,
+		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
+		boost::shared_ptr<SimpleObject> const &Parent) {
 
-	~SimpleServer() {
-		UT_STAT_DECREMENT("SimpleServer");
-	};
+		return boost::shared_ptr<SimpleServer>(new SimpleServer(Port, Callback, Parent));
+	}
+
+	boost::shared_ptr<SimpleServer> GetShared() {
+		return boost::dynamic_pointer_cast<SimpleServer>(shared_from_this());
+	}
 
 	virtual void Start();
 
 	virtual void Stop();
 
+	~SimpleServer() {
+		UT_STAT_DECREMENT("SimpleServer");
+	};
+
 private:
+	SimpleServer(unsigned short Port,
+		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
+		boost::shared_ptr<SimpleObject> const &Parent) :
+		m_acceptor(IoService(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), Port)),
+		m_started(false),
+		SimpleConnectionManager(Callback, Parent) {
+
+		UT_STAT_INCREMENT("SimpleServer");
+	};
+
 	SimpleServer& operator=(SimpleServer const &) = delete;
 	SimpleServer(SimpleServer const &) = delete;
 

@@ -20,28 +20,43 @@
 #include <boost/thread.hpp>
 #include "SimpleConnection.h"
 
-class SimpleConnectionManager {
+class SimpleConnectionManager : public SimpleObject {
 	friend class SimpleConnection;
 
 public:
-	SimpleConnectionManager(void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
-		m_ioService(),
-		m_connectionEventCallback(Callback),
-		m_connectionManagerStarted(false) {
-	
-		UT_STAT_INCREMENT("SimpleConnectionManager");
-	};
+	static boost::shared_ptr<SimpleConnectionManager> Create(void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
+		boost::shared_ptr<SimpleObject> const &Parent) {
 
-	virtual ~SimpleConnectionManager() {
-		UT_STAT_DECREMENT("SimpleConnectionManager");
-	};
+		return boost::shared_ptr<SimpleConnectionManager>(new SimpleConnectionManager(Callback, Parent));
+	}
+
+	boost::shared_ptr<SimpleConnectionManager> GetShared() {
+		return boost::dynamic_pointer_cast<SimpleConnectionManager>(shared_from_this());
+	}
 
 	virtual void Start();
 
 	virtual void Stop();
 
+	virtual ~SimpleConnectionManager() {
+		UT_STAT_DECREMENT("SimpleConnectionManager");
+	};
+
 protected:
-	void HandleConnectionEvent(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent);
+	SimpleConnectionManager(void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
+		boost::shared_ptr<SimpleObject> const &Parent) :
+		m_ioService(),
+		m_connectionEventCallback(Callback),
+		m_connectionManagerStarted(false),
+		SimpleObject(Parent) {
+
+		UT_STAT_INCREMENT("SimpleConnectionManager");
+	};
+
+	SimpleConnectionManager& operator=(SimpleConnectionManager const &) = delete;
+	SimpleConnectionManager(SimpleConnectionManager const &) = delete;
+
+	virtual void HandleEvent(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent);
 
 	void AddConnection(boost::shared_ptr<SimpleConnection> const &Connection);
 
@@ -66,9 +81,6 @@ protected:
 	void(*m_connectionEventCallback)(boost::shared_ptr<SimpleConnectionEvent>);
 
 private:
-	SimpleConnectionManager& operator=(SimpleConnectionManager const &) = delete;
-	SimpleConnectionManager(SimpleConnectionManager const &) = delete;
-
 	boost::asio::io_service m_ioService;
 	boost::thread m_ioServiceThread;
 	boost::atomic<bool> m_connectionManagerStarted;

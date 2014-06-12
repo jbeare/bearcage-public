@@ -95,9 +95,9 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase1) {
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnectionEvent"), 0);
 
 	try {
-		SimpleServer server(DEFAULT_PORT, &ServerConnectionEventCallback);
-		SimpleClient client1("localhost", DEFAULT_PORT, &ClientConnectionEventCallback);
-		SimpleClient client2("localhost", DEFAULT_PORT, &ClientConnectionEventCallback);
+		boost::shared_ptr<SimpleServer> server = SimpleServer::Create(DEFAULT_PORT, &ServerConnectionEventCallback, NULL);
+		boost::shared_ptr<SimpleClient> client1 = SimpleClient::Create("localhost", DEFAULT_PORT, &ClientConnectionEventCallback, NULL);
+		boost::shared_ptr<SimpleClient> client2 = SimpleClient::Create("localhost", DEFAULT_PORT, &ClientConnectionEventCallback, NULL);
 
 		for(int i = 0; i < 3; i++) {
 			BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleServer"), 1);
@@ -106,17 +106,17 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase1) {
 			BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnectionEvent"), 0);
 
 			if(i % 3 == 0) {
-				server.Start();
-				client1.Start();
-				client2.Start();
+				server->Start();
+				client1->Start();
+				client2->Start();
 			} else if(i % 3 == 1) {
-				client1.Start();
-				server.Start();
-				client2.Start();
+				client1->Start();
+				server->Start();
+				client2->Start();
 			} else {
-				client1.Start();
-				client2.Start();
-				server.Start();
+				client1->Start();
+				client2->Start();
+				server->Start();
 			}
 
 			WaitForActivity();
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase1) {
 			g_serverLoopback = true;
 			g_clientLoopback = true;
 
-			client1.Write(std::vector<char>{'t', 'e', 's', 't'});
-			client2.Write(std::vector<char>{'t', 'e', 's', 't'});
+			client1->Write(std::vector<char>{'t', 'e', 's', 't'});
+			client2->Write(std::vector<char>{'t', 'e', 's', 't'});
 
 			boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
 
@@ -137,17 +137,17 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase1) {
 			WaitForActivity();
 
 			if(i % 3 == 0) {
-				server.Stop();
-				client1.Stop();
-				client2.Stop();
+				server->Stop();
+				client1->Stop();
+				client2->Stop();
 			} else if(i % 3 == 1) {
-				client1.Stop();
-				server.Stop();
-				client2.Stop();
+				client1->Stop();
+				server->Stop();
+				client2->Stop();
 			} else {
-				client1.Stop();
-				client2.Stop();
-				server.Stop();
+				client1->Stop();
+				client2->Stop();
+				server->Stop();
 			}
 
 			WaitForActivity();
@@ -178,8 +178,8 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase2) {
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnectionEvent"), 0);
 
 	try {
-		SimpleServer server(DEFAULT_PORT, &ServerConnectionEventCallback);
-		SimpleClient client("localhost", DEFAULT_PORT, &ClientConnectionEventCallback);
+		boost::shared_ptr<SimpleServer> server = SimpleServer::Create(DEFAULT_PORT, &ServerConnectionEventCallback, NULL);
+		boost::shared_ptr<SimpleClient> client = SimpleClient::Create("localhost", DEFAULT_PORT, &ClientConnectionEventCallback, NULL);
 
 		for(int i = 0; i < 2; i++) {
 			BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleServer"), 1);
@@ -188,11 +188,11 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase2) {
 			BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnectionEvent"), 0);
 
 			if(i % 2 == 0) {
-				server.Start();
-				client.Start();
+				server->Start();
+				client->Start();
 			} else {
-				client.Start();
-				server.Start();
+				client->Start();
+				server->Start();
 			}
 
 			WaitForActivity();
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase2) {
 			g_serverLoopback = true;
 
 			for(int j = 0; j < 100; j++) {
-				client.Write(std::vector<char>{'t', 'e', 's', 't'});
+				client->Write(std::vector<char>{'t', 'e', 's', 't'});
 			}
 
 			WaitForActivity();
@@ -214,11 +214,11 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase2) {
 			g_serverLoopback = false;
 
 			if(i % 2 == 0) {
-				server.Stop();
-				client.Stop();
+				server->Stop();
+				client->Stop();
 			} else {
-				client.Stop();
-				server.Stop();
+				client->Stop();
+				server->Stop();
 			}
 
 			WaitForActivity();
@@ -248,11 +248,11 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase3) {
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnectionEvent"), 0);
 
 	try {
-		SimpleServer server(DEFAULT_PORT, &ServerConnectionEventCallback);
+		boost::shared_ptr<SimpleServer> server = SimpleServer::Create(DEFAULT_PORT, &ServerConnectionEventCallback, NULL);
 		std::vector<boost::shared_ptr<SimpleClient>> clients;
 
 		for(int i = 0; i < 100; i++) {
-			clients.push_back(boost::shared_ptr<SimpleClient>(new SimpleClient("localhost", DEFAULT_PORT, &ClientConnectionEventCallback)));
+			clients.push_back(SimpleClient::Create("localhost", DEFAULT_PORT, &ClientConnectionEventCallback, NULL));
 		}
 
 		BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleServer"), 1);
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase3) {
 		BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnection"), 0);
 		BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnectionEvent"), 0);
 
-		server.Start();
+		server->Start();
 		for(boost::shared_ptr<SimpleClient> client : clients) {
 			client->Start();
 		}
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase3) {
 			}
 
 			for(int k = 0; k < 10; k++) {
-				boost::shared_ptr<SimpleClient> add(new SimpleClient("localhost", DEFAULT_PORT, &ClientConnectionEventCallback));
+				boost::shared_ptr<SimpleClient> add(SimpleClient::Create("localhost", DEFAULT_PORT, &ClientConnectionEventCallback, NULL));
 				clients.push_back(add);
 				add->Start();
 			}
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase3) {
 		for(boost::shared_ptr<SimpleClient> client : clients) {
 			client->Stop();
 		}
-		server.Stop();
+		server->Stop();
 
 		WaitForActivity();
 		BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleServer"), 1);
@@ -322,44 +322,6 @@ BOOST_AUTO_TEST_CASE(SimpleServerTestCase3) {
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleClient"), 0);
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnection"), 0);
 	BOOST_CHECK_EQUAL(UT_STAT_COUNT("SimpleConnectionEvent"), 0);
-}
-
-//Test SimpleObject
-BOOST_AUTO_TEST_CASE(SimpleServerTestCase4) {
-	boost::weak_ptr<SimpleObject> wobj1;
-	boost::weak_ptr<AdvancedObject> wobj2;
-
-	{
-		boost::shared_ptr<SimpleObject> obj1 = SimpleObject::Create();
-		boost::shared_ptr<AdvancedObject> obj2 = AdvancedObject::Create();
-		wobj1 = obj1;
-		wobj2 = obj2;
-
-		{
-			boost::shared_ptr<SimpleObject> pobj1 = obj1->GetSharedPointer();
-			boost::shared_ptr<AdvancedObject> pobj2 = obj2->GetSharedPointer();
-
-			BOOST_CHECK_EQUAL(obj1->WhoAmI(), 0);
-			BOOST_CHECK_EQUAL(obj2->WhoAmI(), 1);
-			BOOST_CHECK_EQUAL(pobj1->WhoAmI(), 0);
-			BOOST_CHECK_EQUAL(pobj2->WhoAmI(), 1);
-
-			BOOST_CHECK_EQUAL(obj1.use_count(), 2);
-			BOOST_CHECK_EQUAL(obj2.use_count(), 2);
-			BOOST_CHECK_EQUAL(pobj1.use_count(), 2);
-			BOOST_CHECK_EQUAL(pobj2.use_count(), 2);
-			BOOST_CHECK_EQUAL(wobj1.use_count(), 2);
-			BOOST_CHECK_EQUAL(wobj2.use_count(), 2);
-		}
-
-		BOOST_CHECK_EQUAL(obj1.use_count(), 1);
-		BOOST_CHECK_EQUAL(obj2.use_count(), 1);
-		BOOST_CHECK_EQUAL(wobj1.use_count(), 1);
-		BOOST_CHECK_EQUAL(wobj2.use_count(), 1);
-	}
-
-	BOOST_CHECK_EQUAL(wobj1.use_count(), 0);
-	BOOST_CHECK_EQUAL(wobj2.use_count(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

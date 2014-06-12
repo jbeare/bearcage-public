@@ -50,7 +50,7 @@ void SimpleConnectionManager::Stop() {
 	m_ioService.reset();
 }
 
-void SimpleConnectionManager::HandleConnectionEvent(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent) {
+void SimpleConnectionManager::HandleEvent(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent) {
 	switch(ConnectionEvent->EventType()) {
 	case SimpleConnectionEvent::Connected:
 		AddConnection(ConnectionEvent->Connection());
@@ -65,6 +65,8 @@ void SimpleConnectionManager::HandleConnectionEvent(boost::shared_ptr<SimpleConn
 	}
 	
 	ConnectionEventCallback(ConnectionEvent);
+
+	SimpleObject::HandleEvent(ConnectionEvent);
 }
 
 void SimpleConnectionManager::AddConnection(boost::shared_ptr<SimpleConnection> const &Connection) {

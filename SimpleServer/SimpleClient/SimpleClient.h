@@ -22,17 +22,15 @@
 
 class SimpleClient : public SimpleConnectionManager {
 public:
-	SimpleClient(std::string const &Host, unsigned short Port, void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>)) :
-		m_query(boost::asio::ip::tcp::v4(), Host, std::to_string(Port)),
-		m_resolver(IoService()),
-		m_started(false),
-		SimpleConnectionManager(Callback) {
-	
-		UT_STAT_INCREMENT("SimpleClient");
-	};
+	static boost::shared_ptr<SimpleClient> Create(std::string const &Host, unsigned short Port,
+		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
+		boost::shared_ptr<SimpleObject> const &Parent) {
 
-	~SimpleClient() {
-		UT_STAT_DECREMENT("SimpleClient");
+		return boost::shared_ptr<SimpleClient>(new SimpleClient(Host, Port, Callback, Parent));
+	}
+
+	boost::shared_ptr<SimpleClient> GetShared() {
+		return boost::dynamic_pointer_cast<SimpleClient>(shared_from_this());
 	}
 
 	virtual void Start();
@@ -46,7 +44,22 @@ public:
 		}
 	}
 
+	~SimpleClient() {
+		UT_STAT_DECREMENT("SimpleClient");
+	}
+
 private:
+	SimpleClient(std::string const &Host, unsigned short Port,
+		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
+		boost::shared_ptr<SimpleObject> const &Parent) :
+		m_query(boost::asio::ip::tcp::v4(), Host, std::to_string(Port)),
+		m_resolver(IoService()),
+		m_started(false),
+		SimpleConnectionManager(Callback, Parent) {
+
+		UT_STAT_INCREMENT("SimpleClient");
+	};
+
 	SimpleClient& operator=(SimpleClient const &) = delete;
 	SimpleClient(SimpleClient const &) = delete;
 

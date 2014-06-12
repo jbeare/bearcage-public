@@ -44,7 +44,7 @@ void SimpleClient::Stop() {
 
 void SimpleClient::HandleResolve(boost::system::error_code const &Error, boost::asio::ip::tcp::resolver::iterator Iterator) {
 	if(!Error) {
-		boost::shared_ptr<SimpleConnection> connection = SimpleConnection::Create(IoService(), this);
+		boost::shared_ptr<SimpleConnection> connection = SimpleConnection::Create(IoService(), GetShared());
 		connection->Socket().async_connect(*Iterator,
 			boost::bind(&SimpleClient::HandleConnect, this, connection,
 			boost::asio::placeholders::error));
@@ -55,6 +55,6 @@ void SimpleClient::HandleConnect(boost::shared_ptr<SimpleConnection> Connection,
 	if(!Error) {
 		boost::shared_ptr<SimpleConnectionEvent> connectionEvent =
 			SimpleConnectionEvent::Create(SimpleConnectionEvent::Connected, Connection, std::vector<char>(), 0);
-		HandleConnectionEvent(connectionEvent);
+		HandleEvent(connectionEvent);
 	}
 }

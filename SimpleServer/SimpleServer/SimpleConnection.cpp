@@ -23,7 +23,7 @@ void SimpleConnection::Start() {
 
 	m_started = true;
 	m_socket.async_read_some(boost::asio::buffer(m_readBuffer),
-		boost::bind(&SimpleConnection::HandleRead, shared_from_this(),
+		boost::bind(&SimpleConnection::HandleRead, GetShared(),
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred));
 }
@@ -47,28 +47,20 @@ void SimpleConnection::Write(std::vector<char> const &Buffer) {
 	boost::asio::write(m_socket, boost::asio::buffer(m_writeBuffer));
 }
 
-void SimpleConnection::ConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
-	if(m_parent) {
-		m_parent->HandleConnectionEvent(ConnectionEvent);
-	} else if(m_callback) {
-		m_callback(ConnectionEvent);
-	}
-}
-
 void SimpleConnection::HandleRead(boost::system::error_code const &Error, size_t BytesTransferred) {
 	if(Error.value() == boost::system::errc::success) {
 		if(BytesTransferred) {
-			auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Read, shared_from_this(), m_readBuffer, BytesTransferred);
-			ConnectionEventCallback(connectionEvent);
+			auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Read, GetShared(), m_readBuffer, BytesTransferred);
+			HandleEvent(connectionEvent);
 		}
 
 		m_socket.async_read_some(boost::asio::buffer(m_readBuffer),
-			boost::bind(&SimpleConnection::HandleRead, shared_from_this(),
+			boost::bind(&SimpleConnection::HandleRead, GetShared(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
 	} else {
-		auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Disconnected, shared_from_this(), std::vector<char>(), 0);
-		ConnectionEventCallback(connectionEvent);
+		auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Disconnected, GetShared(), std::vector<char>(), 0);
+		HandleEvent(connectionEvent);
 	}
 }
 

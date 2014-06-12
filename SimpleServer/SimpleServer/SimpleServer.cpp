@@ -47,7 +47,7 @@ void SimpleServer::AcceptConnection() {
 		return;
 	}
 
-	boost::shared_ptr<SimpleConnection> connection = SimpleConnection::Create(IoService(), this);
+	boost::shared_ptr<SimpleConnection> connection = SimpleConnection::Create(IoService(), GetShared());
 
 	m_acceptor.async_accept(connection->Socket(),
 		boost::bind(&SimpleServer::HandleAcceptConnection, this, connection,
@@ -57,7 +57,7 @@ void SimpleServer::AcceptConnection() {
 void SimpleServer::HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error) {
 	if(!Error) {
 		auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Connected, Connection, std::vector<char>(), 0);
-		HandleConnectionEvent(connectionEvent);
+		HandleEvent(connectionEvent);
 	}
 
 	AcceptConnection();

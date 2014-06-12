@@ -17,41 +17,43 @@
 #pragma once
 
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include "Utility.h"
 
-#define SIMPLE_CLASS_HEADER(CLASS_NAME); \
-static boost::shared_ptr<CLASS_NAME> Create() { \
-	return boost::shared_ptr<CLASS_NAME>(new CLASS_NAME()); \
-} \
-boost::shared_ptr<CLASS_NAME> GetSharedPointer() { \
-	return boost::dynamic_pointer_cast<CLASS_NAME>(shared_from_this()); \
-}
+class SimpleConnectionEvent;
 
 class SimpleObject : public boost::enable_shared_from_this<SimpleObject> {
 public:
-	SIMPLE_CLASS_HEADER(SimpleObject);
-
-	int WhoAmI() {
-		return 0;
+	static boost::shared_ptr<SimpleObject> Create(boost::shared_ptr<SimpleObject> const &Parent) {
+		return boost::shared_ptr<SimpleObject>(new SimpleObject(Parent));
 	}
 
-	virtual ~SimpleObject() {};
-
-protected:
-	SimpleObject() {};
-};
-
-class AdvancedObject : public SimpleObject {
-public:
-	SIMPLE_CLASS_HEADER(AdvancedObject);
-
-	int WhoAmI() {
-		return 1;
+	boost::shared_ptr<SimpleObject> GetShared() {
+		return boost::dynamic_pointer_cast<SimpleObject>(shared_from_this());
 	}
 
-	virtual ~AdvancedObject() {};
+	boost::shared_ptr<SimpleObject> GetParent() {
+		return m_parent;
+	}
+
+	virtual ~SimpleObject() {
+		UT_STAT_INCREMENT("SimpleObject");
+	};
 
 protected:
-	AdvancedObject() {};
+	SimpleObject(boost::shared_ptr<SimpleObject> const &Parent) : m_parent(Parent) {
+		UT_STAT_DECREMENT("SimpleObject");
+	};
+
+	SimpleObject& operator=(SimpleObject const &) = delete;
+	SimpleObject(SimpleObject const &) = delete;
+
+	virtual void HandleEvent(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent) {
+		if(m_parent) {
+			m_parent->HandleEvent(ConnectionEvent);
+		}
+	};
+
+private:
+	boost::shared_ptr<SimpleObject> m_parent;
 };
