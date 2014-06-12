@@ -44,8 +44,8 @@ int main(int argc, char* argv[]) {
 		data.resize(5);
 		memcpy_s(data.data(), data.size(), "Hello", 5);
 
-		SimpleClient client("localhost", DEFAULT_PORT, &ConnectionEventCallback);
-		client.Start();
+		boost::shared_ptr<SimpleClient> client = SimpleClient::Create("localhost", DEFAULT_PORT, &ConnectionEventCallback, NULL);
+		client->Start();
 
 		for(;;) {
 			boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		client.Stop();
+		client->Stop();
 	} catch(std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	}

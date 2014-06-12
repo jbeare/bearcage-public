@@ -41,14 +41,14 @@ int main() {
 		data.resize(5);
 		memcpy_s(data.data(), data.size(), "Hello", 5);
 
-		SimpleServer server(DEFAULT_PORT, &ConnectionEventCallback);
-		server.Start();
+		boost::shared_ptr<SimpleServer> server = SimpleServer::Create(DEFAULT_PORT, &ConnectionEventCallback, NULL);
+		server->Start();
 
 		for(;;) {
 			boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 		}
 
-		server.Stop();
+		server->Stop();
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	}

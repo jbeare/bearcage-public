@@ -75,11 +75,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\SimpleServer\SimpleConnection.cpp" />
+    <ClCompile Include="..\SimpleServer\SimpleConnectionManager.cpp" />
+    <ClCompile Include="..\SimpleServer\Utility.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SimpleClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SimpleServer\SimpleConnection.h" />
+    <ClInclude Include="..\SimpleServer\SimpleConnectionManager.h" />
+    <ClInclude Include="..\SimpleServer\SimpleObject.h" />
+    <ClInclude Include="..\SimpleServer\Utility.h" />
     <ClInclude Include="SimpleClient.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
