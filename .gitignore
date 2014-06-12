@@ -1,6 +1,5 @@
 *.sdf
-SimpleServer/ipch*
-SimpleServer/TestResults*
+*.coverage
 SimpleServer/Debug*
 SimpleServer/Release*
 SimpleServer/SimpleClient/Debug*
@@ -9,5 +8,3 @@ SimpleServer/SimpleServer/Debug*
 SimpleServer/SimpleServer/Release*
 SimpleServer/SimpleTest/Debug*
 SimpleServer/SimpleTest/Release*
-SimpleServer/SimpleTest2/Debug*
-SimpleServer/SimpleTest2/Release*
