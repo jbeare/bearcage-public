@@ -20,7 +20,42 @@
 #include <boost/enable_shared_from_this.hpp>
 #include "Utility.h"
 
-class SimpleConnectionEvent;
+class SimpleEvent : public boost::enable_shared_from_this<SimpleEvent> {
+public:
+	enum EventType{
+		Connected,
+		Disconnected,
+		Read_Completed,
+		Write_Completed
+	};
+
+	static boost::shared_ptr<SimpleEvent> Create(EventType Type) {
+		return boost::shared_ptr<SimpleEvent>(new SimpleEvent(Type));
+	}
+
+	boost::shared_ptr<SimpleEvent> GetShared() {
+		return boost::dynamic_pointer_cast<SimpleEvent>(shared_from_this());
+	}
+
+	EventType GetEventType() {
+		return m_eventType;
+	}
+
+	virtual ~SimpleEvent() {
+		UT_STAT_INCREMENT("SimpleEvent");
+	};
+
+protected:
+	SimpleEvent(EventType Type) : m_eventType(Type) {
+		UT_STAT_DECREMENT("SimpleEvent");
+	};
+
+	SimpleEvent& operator=(SimpleEvent const &) = delete;
+	SimpleEvent(SimpleEvent const &) = delete;
+
+private:
+	EventType m_eventType;
+};
 
 class SimpleObject : public boost::enable_shared_from_this<SimpleObject> {
 public:
@@ -36,6 +71,10 @@ public:
 		return m_parent;
 	}
 
+	void SetParent(boost::shared_ptr<SimpleObject> const &Parent) {
+		m_parent = Parent;
+	}
+
 	virtual ~SimpleObject() {
 		UT_STAT_INCREMENT("SimpleObject");
 	};
@@ -48,9 +87,9 @@ protected:
 	SimpleObject& operator=(SimpleObject const &) = delete;
 	SimpleObject(SimpleObject const &) = delete;
 
-	virtual void HandleEvent(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent) {
+	virtual void HandleEvent(boost::shared_ptr<SimpleEvent> const &Event) {
 		if(m_parent) {
-			m_parent->HandleEvent(ConnectionEvent);
+			m_parent->HandleEvent(Event);
 		}
 	};
 

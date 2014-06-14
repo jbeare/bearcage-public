@@ -14,10 +14,8 @@
 **                                                                           **
 ******************************************************************************/
 
-#include "SimpleObject.h"
 #include "SimpleServer.h"
 #include "SimpleClient.h"
-#include "Utility.h"
 #include <boost/thread/condition.hpp>
 
 #define BOOST_TEST_MODULE SimpleTest
@@ -46,12 +44,12 @@ void WaitForActivity() {
 
 void ServerConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
 	ResetActivityTimeout();
-	switch(ConnectionEvent->EventType()) {
+	switch(ConnectionEvent->GetEventType()) {
 	case SimpleConnectionEvent::Connected:
 		break;
 	case SimpleConnectionEvent::Disconnected:
 		break;
-	case SimpleConnectionEvent::Read:
+	case SimpleConnectionEvent::Read_Completed:
 		UT_STAT_ADD("ServerReadBytes", ConnectionEvent->Data().size());
 		if(g_serverLoopback) {
 			ConnectionEvent->Connection()->Write(ConnectionEvent->Data());
@@ -65,12 +63,12 @@ void ServerConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> Conn
 
 void ClientConnectionEventCallback(boost::shared_ptr<SimpleConnectionEvent> ConnectionEvent) {
 	ResetActivityTimeout();
-	switch(ConnectionEvent->EventType()) {
+	switch(ConnectionEvent->GetEventType()) {
 	case SimpleConnectionEvent::Connected:
 		break;
 	case SimpleConnectionEvent::Disconnected:
 		break;
-	case SimpleConnectionEvent::Read:
+	case SimpleConnectionEvent::Read_Completed:
 		UT_STAT_ADD("ClientReadBytes", ConnectionEvent->Data().size());
 		if(g_clientLoopback) {
 			ConnectionEvent->Connection()->Write(ConnectionEvent->Data());

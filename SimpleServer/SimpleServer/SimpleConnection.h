@@ -20,30 +20,20 @@
 #include <boost/atomic.hpp>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include "SimpleObject.h"
+#include "SimpleTypes.h"
 
 #define MAX_BUFFER_LENGTH 1000
 #define DEFAULT_PORT 13
 
 class SimpleConnection;
-class SimpleConnectionManager;
 
-class SimpleConnectionEvent {
+class SimpleConnectionEvent : public SimpleEvent {
 public:
-	enum SimpleConnectionEventType{
-		Connected,
-		Disconnected,
-		Read
-	};
-
-	static boost::shared_ptr<SimpleConnectionEvent> Create(SimpleConnectionEventType EventType,
-		boost::shared_ptr<SimpleConnection> const &Connection, std::vector<char> const &Data, unsigned int Length) {
+	static boost::shared_ptr<SimpleConnectionEvent> Create(EventType EventType,
+		boost::shared_ptr<SimpleConnection> const &Connection,
+		std::vector<char> const &Data, unsigned int Length) {
 
 		return boost::shared_ptr<SimpleConnectionEvent>(new SimpleConnectionEvent(EventType, Connection, Data, Length));
-	}
-
-	SimpleConnectionEventType EventType() {
-		return m_eventType;
 	}
 
 	boost::shared_ptr<SimpleConnection> Connection() {
@@ -59,10 +49,10 @@ public:
 	}
 
 private:
-	SimpleConnectionEvent(SimpleConnectionEventType EventType,
+	SimpleConnectionEvent(EventType EventType,
 		boost::shared_ptr<SimpleConnection> const &Connection, std::vector<char> const &Data, unsigned int Length) :
-		m_eventType(EventType),
-		m_connection(Connection) {
+		m_connection(Connection),
+		SimpleEvent(EventType) {
 	
 		if(Length > MAX_BUFFER_LENGTH || Length > Data.size()) {
 			return;
@@ -76,7 +66,6 @@ private:
 	SimpleConnectionEvent &operator=(SimpleConnectionEvent const &) = delete;
 	SimpleConnectionEvent(SimpleConnectionEvent const &) = delete;
 
-	SimpleConnectionEventType m_eventType;
 	boost::shared_ptr<SimpleConnection> m_connection;
 	std::vector<char> m_data;
 };

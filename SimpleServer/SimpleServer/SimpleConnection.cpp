@@ -50,7 +50,7 @@ void SimpleConnection::Write(std::vector<char> const &Buffer) {
 void SimpleConnection::HandleRead(boost::system::error_code const &Error, size_t BytesTransferred) {
 	if(Error.value() == boost::system::errc::success) {
 		if(BytesTransferred) {
-			auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Read, GetShared(), m_readBuffer, BytesTransferred);
+			auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Read_Completed, GetShared(), m_readBuffer, BytesTransferred);
 			HandleEvent(connectionEvent);
 		}
 

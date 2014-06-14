@@ -50,7 +50,7 @@
     <ClInclude Include="..\SimpleServer\SimpleConnectionManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\SimpleServer\SimpleObject.h">
+    <ClInclude Include="..\SimpleServer\SimpleTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

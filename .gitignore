@@ -1,4 +1,5 @@
 *.sdf
+*.opensdf
 *.coverage
 SimpleServer/Debug*
 SimpleServer/Release*

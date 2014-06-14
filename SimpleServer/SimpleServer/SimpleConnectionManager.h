@@ -56,7 +56,7 @@ protected:
 	SimpleConnectionManager& operator=(SimpleConnectionManager const &) = delete;
 	SimpleConnectionManager(SimpleConnectionManager const &) = delete;
 
-	virtual void HandleEvent(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent);
+	virtual void HandleEvent(boost::shared_ptr<SimpleEvent> const &Event);
 
 	void AddConnection(boost::shared_ptr<SimpleConnection> const &Connection);
 

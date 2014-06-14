@@ -50,23 +50,24 @@ void SimpleConnectionManager::Stop() {
 	m_ioService.reset();
 }
 
-void SimpleConnectionManager::HandleEvent(boost::shared_ptr<SimpleConnectionEvent> const &ConnectionEvent) {
-	switch(ConnectionEvent->EventType()) {
+void SimpleConnectionManager::HandleEvent(boost::shared_ptr<SimpleEvent> const &Event) {
+
+	switch(Event->GetEventType()) {
 	case SimpleConnectionEvent::Connected:
-		AddConnection(ConnectionEvent->Connection());
+		AddConnection(boost::dynamic_pointer_cast<SimpleConnectionEvent>(Event)->Connection());
 		break;
 	case SimpleConnectionEvent::Disconnected:
-		RemoveConnection(ConnectionEvent->Connection());
+		RemoveConnection(boost::dynamic_pointer_cast<SimpleConnectionEvent>(Event)->Connection());
 		break;
-	case SimpleConnectionEvent::Read:
+	case SimpleConnectionEvent::Read_Completed:
 		break;
 	default:
 		break;
 	}
 	
-	ConnectionEventCallback(ConnectionEvent);
+	ConnectionEventCallback(boost::dynamic_pointer_cast<SimpleConnectionEvent>(Event));
 
-	SimpleObject::HandleEvent(ConnectionEvent);
+	SimpleObject::HandleEvent(Event);
 }
 
 void SimpleConnectionManager::AddConnection(boost::shared_ptr<SimpleConnection> const &Connection) {
