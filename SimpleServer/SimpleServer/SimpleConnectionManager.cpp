@@ -39,7 +39,9 @@ void SimpleConnectionManager::Stop() {
 		m_connectionManagerStarted = false;
 
 		for(auto &connection : m_connections) {
-			connection->Stop();
+			if(connection) {
+				connection->Stop();
+			}
 		}
 
 		m_connections.clear();
@@ -51,6 +53,9 @@ void SimpleConnectionManager::Stop() {
 }
 
 void SimpleConnectionManager::HandleEvent(boost::shared_ptr<SimpleEvent> const &Event) {
+	if(!Event) {
+		return;
+	}
 
 	switch(Event->GetEventType()) {
 	case SimpleConnectionEvent::Connected:
@@ -71,6 +76,10 @@ void SimpleConnectionManager::HandleEvent(boost::shared_ptr<SimpleEvent> const &
 void SimpleConnectionManager::AddConnection(boost::shared_ptr<SimpleConnection> const &Connection) {
 	boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
 
+	if(!Connection) {
+		return;
+	}
+
 	if(!m_connectionManagerStarted) {
 		return;
 	}
@@ -87,6 +96,10 @@ void SimpleConnectionManager::AddConnection(boost::shared_ptr<SimpleConnection> 
 
 void SimpleConnectionManager::RemoveConnection(boost::shared_ptr<SimpleConnection> const &Connection) {
 	boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
+
+	if(!Connection) {
+		return;
+	}
 
 	for(auto iter = m_connections.begin(); iter != m_connections.end(); iter++) {
 		if(*iter == Connection) {

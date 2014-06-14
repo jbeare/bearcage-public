@@ -22,6 +22,7 @@ void SimpleConnection::Start() {
 	}
 
 	m_started = true;
+
 	m_socket.async_read_some(boost::asio::buffer(m_readBuffer),
 		boost::bind(&SimpleConnection::HandleRead, GetShared(),
 		boost::asio::placeholders::error,
