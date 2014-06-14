@@ -64,8 +64,6 @@ void SimpleConnectionManager::HandleEvent(boost::shared_ptr<SimpleEvent> const &
 	default:
 		break;
 	}
-	
-	ConnectionEventCallback(boost::dynamic_pointer_cast<SimpleConnectionEvent>(Event));
 
 	SimpleObject::HandleEvent(Event);
 }

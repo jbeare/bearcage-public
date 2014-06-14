@@ -16,17 +16,14 @@
 
 #pragma once
 
-#include <string>
-#include <boost/thread.hpp>
 #include "SimpleConnectionManager.h"
 
 class SimpleClient : public SimpleConnectionManager {
 public:
 	static boost::shared_ptr<SimpleClient> Create(std::string const &Host, unsigned short Port,
-		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
 		boost::shared_ptr<SimpleObject> const &Parent) {
 
-		return boost::shared_ptr<SimpleClient>(new SimpleClient(Host, Port, Callback, Parent));
+		return boost::shared_ptr<SimpleClient>(new SimpleClient(Host, Port, Parent));
 	}
 
 	boost::shared_ptr<SimpleClient> GetShared() {
@@ -48,18 +45,18 @@ public:
 		UT_STAT_DECREMENT("SimpleClient");
 	}
 
-private:
+protected:
 	SimpleClient(std::string const &Host, unsigned short Port,
-		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
 		boost::shared_ptr<SimpleObject> const &Parent) :
 		m_query(boost::asio::ip::tcp::v4(), Host, std::to_string(Port)),
 		m_resolver(IoService()),
 		m_started(false),
-		SimpleConnectionManager(Callback, Parent) {
+		SimpleConnectionManager(Parent) {
 
 		UT_STAT_INCREMENT("SimpleClient");
 	};
 
+private:
 	SimpleClient& operator=(SimpleClient const &) = delete;
 	SimpleClient(SimpleClient const &) = delete;
 
@@ -79,5 +76,5 @@ private:
 	boost::asio::ip::tcp::resolver::query m_query;
 	boost::asio::ip::tcp::resolver m_resolver;
 	boost::recursive_mutex m_mutex;
-	boost::atomic<bool> m_started;
+	bool m_started;
 };

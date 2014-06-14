@@ -17,8 +17,6 @@
 #pragma once
 
 #include <vector>
-#include <boost/atomic.hpp>
-#include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include "SimpleTypes.h"
 
@@ -48,7 +46,7 @@ public:
 		UT_STAT_DECREMENT("SimpleConnectionEvent");
 	}
 
-private:
+protected:
 	SimpleConnectionEvent(EventType EventType,
 		boost::shared_ptr<SimpleConnection> const &Connection, std::vector<char> const &Data, unsigned int Length) :
 		m_connection(Connection),
@@ -63,6 +61,7 @@ private:
 		UT_STAT_INCREMENT("SimpleConnectionEvent");
 	};
 
+private:
 	SimpleConnectionEvent &operator=(SimpleConnectionEvent const &) = delete;
 	SimpleConnectionEvent(SimpleConnectionEvent const &) = delete;
 
@@ -96,7 +95,7 @@ public:
 		UT_STAT_DECREMENT("SimpleConnection");
 	}
 
-private:
+protected:
 	SimpleConnection(boost::asio::io_service &IoService,
 		boost::shared_ptr<SimpleObject> const &Parent) :
 		m_socket(IoService),
@@ -107,6 +106,7 @@ private:
 		UT_STAT_INCREMENT("SimpleConnection");
 	};
 
+private:
 	SimpleConnection &operator=(SimpleConnection const &) = delete;
 	SimpleConnection(SimpleConnection const &) = delete;
 
@@ -117,5 +117,5 @@ private:
 	boost::asio::ip::tcp::socket m_socket;
 	std::vector<char> m_readBuffer;
 	std::vector<char> m_writeBuffer;
-	boost::atomic<bool> m_started;
+	bool m_started;
 };

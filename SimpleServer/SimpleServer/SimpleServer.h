@@ -16,16 +16,14 @@
 
 #pragma once
 
-#include <boost/thread.hpp>
 #include "SimpleConnectionManager.h"
 
 class SimpleServer : public SimpleConnectionManager {
 public:
 	static boost::shared_ptr<SimpleServer> Create(unsigned short Port,
-		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
 		boost::shared_ptr<SimpleObject> const &Parent) {
 
-		return boost::shared_ptr<SimpleServer>(new SimpleServer(Port, Callback, Parent));
+		return boost::shared_ptr<SimpleServer>(new SimpleServer(Port, Parent));
 	}
 
 	boost::shared_ptr<SimpleServer> GetShared() {
@@ -40,17 +38,17 @@ public:
 		UT_STAT_DECREMENT("SimpleServer");
 	};
 
-private:
+protected:
 	SimpleServer(unsigned short Port,
-		void(*Callback)(boost::shared_ptr<SimpleConnectionEvent>),
 		boost::shared_ptr<SimpleObject> const &Parent) :
 		m_acceptor(IoService(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), Port)),
 		m_started(false),
-		SimpleConnectionManager(Callback, Parent) {
+		SimpleConnectionManager(Parent) {
 
 		UT_STAT_INCREMENT("SimpleServer");
 	};
 
+private:
 	SimpleServer& operator=(SimpleServer const &) = delete;
 	SimpleServer(SimpleServer const &) = delete;
 
@@ -65,5 +63,5 @@ private:
 
 	boost::asio::ip::tcp::acceptor m_acceptor;
 	boost::recursive_mutex m_mutex;
-	boost::atomic<bool> m_started;
+	bool m_started;
 };

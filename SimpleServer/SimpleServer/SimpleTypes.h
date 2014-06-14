@@ -50,10 +50,10 @@ protected:
 		UT_STAT_DECREMENT("SimpleEvent");
 	};
 
+private:
 	SimpleEvent& operator=(SimpleEvent const &) = delete;
 	SimpleEvent(SimpleEvent const &) = delete;
 
-private:
 	EventType m_eventType;
 };
 
@@ -84,9 +84,6 @@ protected:
 		UT_STAT_DECREMENT("SimpleObject");
 	};
 
-	SimpleObject& operator=(SimpleObject const &) = delete;
-	SimpleObject(SimpleObject const &) = delete;
-
 	virtual void HandleEvent(boost::shared_ptr<SimpleEvent> const &Event) {
 		if(m_parent) {
 			m_parent->HandleEvent(Event);
@@ -94,5 +91,8 @@ protected:
 	};
 
 private:
+	SimpleObject& operator=(SimpleObject const &) = delete;
+	SimpleObject(SimpleObject const &) = delete;
+
 	boost::shared_ptr<SimpleObject> m_parent;
 };
