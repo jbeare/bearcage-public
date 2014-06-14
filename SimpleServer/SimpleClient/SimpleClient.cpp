@@ -51,7 +51,7 @@ void SimpleClient::HandleResolve(boost::system::error_code const &Error, boost::
 	}
 }
 
-void SimpleClient::HandleConnect(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error) {
+void SimpleClient::HandleConnect(boost::shared_ptr<SimpleConnection> const &Connection, boost::system::error_code const &Error) {
 	if(!Error) {
 		boost::shared_ptr<SimpleConnectionEvent> connectionEvent =
 			SimpleConnectionEvent::Create(SimpleConnectionEvent::Connected, Connection, std::vector<char>(), 0);

@@ -54,7 +54,7 @@ void SimpleServer::AcceptConnection() {
 		boost::asio::placeholders::error));
 }
 
-void SimpleServer::HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error) {
+void SimpleServer::HandleAcceptConnection(boost::shared_ptr<SimpleConnection> const &Connection, boost::system::error_code const &Error) {
 	if(!Error) {
 		auto connectionEvent = SimpleConnectionEvent::Create(SimpleConnectionEvent::Connected, Connection, std::vector<char>(), 0);
 		HandleEvent(connectionEvent);

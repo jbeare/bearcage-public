@@ -62,7 +62,7 @@ private:
 
 	void HandleResolve(boost::system::error_code const &Error, boost::asio::ip::tcp::resolver::iterator Iterator);
 
-	void HandleConnect(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error);
+	void HandleConnect(boost::shared_ptr<SimpleConnection> const &Connection, boost::system::error_code const &Error);
 
 	virtual void IoServiceThreadEntry() {
 		m_resolver.async_resolve(m_query,

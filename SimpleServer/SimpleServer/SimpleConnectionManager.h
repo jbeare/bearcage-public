@@ -22,7 +22,6 @@
 class SimpleConnectionManager : public SimpleObject {
 public:
 	static boost::shared_ptr<SimpleConnectionManager> Create(boost::shared_ptr<SimpleObject> const &Parent) {
-
 		return boost::shared_ptr<SimpleConnectionManager>(new SimpleConnectionManager(Parent));
 	}
 

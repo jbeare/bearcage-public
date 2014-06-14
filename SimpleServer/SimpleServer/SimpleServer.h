@@ -20,9 +20,7 @@
 
 class SimpleServer : public SimpleConnectionManager {
 public:
-	static boost::shared_ptr<SimpleServer> Create(unsigned short Port,
-		boost::shared_ptr<SimpleObject> const &Parent) {
-
+	static boost::shared_ptr<SimpleServer> Create(unsigned short Port, boost::shared_ptr<SimpleObject> const &Parent) {
 		return boost::shared_ptr<SimpleServer>(new SimpleServer(Port, Parent));
 	}
 
@@ -54,7 +52,7 @@ private:
 
 	void AcceptConnection();
 
-	void HandleAcceptConnection(boost::shared_ptr<SimpleConnection> Connection, boost::system::error_code const &Error);
+	void HandleAcceptConnection(boost::shared_ptr<SimpleConnection> const &Connection, boost::system::error_code const &Error);
 
 	virtual void IoServiceThreadEntry() {
 		AcceptConnection();
