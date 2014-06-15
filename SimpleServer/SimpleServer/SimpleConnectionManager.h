@@ -19,6 +19,8 @@
 #include <boost/thread.hpp>
 #include "SimpleConnection.h"
 
+#define THREAD_POOL_SIZE 4
+
 class SimpleConnectionManager : public SimpleObject {
 public:
 	static boost::shared_ptr<SimpleConnectionManager> Create(boost::shared_ptr<SimpleObject> const &Parent) {
@@ -59,7 +61,12 @@ protected:
 	}
 
 	virtual void IoServiceThreadEntry() {
-		m_ioService.run();
+		for(int i = 0; i < THREAD_POOL_SIZE; i++) {
+			boost::shared_ptr<boost::thread> thread(new boost::thread(
+				boost::bind(&boost::asio::io_service::run, &m_ioService)));
+
+			m_ioServiceThreads.push_back(thread);
+		}
 	}
 
 private:
@@ -67,8 +74,9 @@ private:
 	SimpleConnectionManager(SimpleConnectionManager const &) = delete;
 
 	boost::asio::io_service m_ioService;
-	boost::thread m_ioServiceThread;
+	std::vector<boost::shared_ptr<boost::thread>> m_ioServiceThreads;
 	bool m_connectionManagerStarted;
 	std::vector<boost::shared_ptr<SimpleConnection>> m_connections;
+	boost::recursive_mutex m_connectionsMutex;
 	boost::recursive_mutex m_connectionManagerMutex;
 };

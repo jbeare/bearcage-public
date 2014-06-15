@@ -25,19 +25,20 @@ void SimpleConnectionManager::Start() {
 
 	m_connectionManagerStarted = true;
 
-	m_ioServiceThread = boost::thread(boost::bind(&SimpleConnectionManager::IoServiceThreadEntry, this));
+	IoServiceThreadEntry();
 }
 
 void SimpleConnectionManager::Stop() {
+	boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
+
+	if(!m_connectionManagerStarted) {
+		return;
+	}
+
+	m_connectionManagerStarted = false;
+
 	{
-		boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
-
-		if(!m_connectionManagerStarted) {
-			return;
-		}
-
-		m_connectionManagerStarted = false;
-
+		boost::lock_guard<boost::recursive_mutex> lock(m_connectionsMutex);
 		for(auto &connection : m_connections) {
 			if(connection) {
 				connection->Stop();
@@ -45,10 +46,15 @@ void SimpleConnectionManager::Stop() {
 		}
 
 		m_connections.clear();
-		m_ioService.stop();
+	}
+	m_ioService.stop();
+
+	for(auto thread : m_ioServiceThreads) {
+		if(thread && thread->joinable()) {
+			thread->join();
+		}
 	}
 
-	m_ioServiceThread.join();
 	m_ioService.reset();
 }
 
@@ -74,7 +80,7 @@ void SimpleConnectionManager::HandleEvent(boost::shared_ptr<SimpleEvent> const &
 }
 
 void SimpleConnectionManager::AddConnection(boost::shared_ptr<SimpleConnection> const &Connection) {
-	boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
+	boost::lock_guard<boost::recursive_mutex> lock(m_connectionsMutex);
 
 	if(!Connection) {
 		return;
@@ -95,7 +101,7 @@ void SimpleConnectionManager::AddConnection(boost::shared_ptr<SimpleConnection> 
 }
 
 void SimpleConnectionManager::RemoveConnection(boost::shared_ptr<SimpleConnection> const &Connection) {
-	boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
+	boost::lock_guard<boost::recursive_mutex> lock(m_connectionsMutex);
 
 	if(!Connection) {
 		return;
@@ -113,7 +119,7 @@ void SimpleConnectionManager::RemoveConnection(boost::shared_ptr<SimpleConnectio
 }
 
 boost::shared_ptr<SimpleConnection> SimpleConnectionManager::GetConnection(unsigned int Index) {
-	boost::lock_guard<boost::recursive_mutex> lock(m_connectionManagerMutex);
+	boost::lock_guard<boost::recursive_mutex> lock(m_connectionsMutex);
 
 	if(Index >= m_connections.size()) {
 		return NULL;
